@@ -3,8 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include "llvm-c/Core.h"
-#include "llvm-c/BitWriter.h"
 
 
 //hashtable implementation
@@ -505,22 +503,25 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
  * 
  * 
 */
-LLVMModuleRef postfix_to_ir(Token* postfix) {
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_EXPR_LEN 1000
+#define MAX_OP_LEN 32
+
+void postfix_to_ir(Token* postfix, char* filename) {
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
 
-LLVMBuilderRef builder = LLVMCreateBuilder();
-    LLVMModuleRef module = LLVMModuleCreateWithName("postfix_module");
+    FILE* fp = fopen(filename, "w");
 
-    LLVMTypeRef int32_type = LLVMInt32Type();
-    LLVMValueRef stack[1000];
+    fprintf(fp, "; ModuleID = 'postfix_module'\n");
+    fprintf(fp, "source_filename = \"postfix_module\"\n\n");
 
-    // Create constant string for printf call
-    LLVMValueRef format_str = LLVMBuildGlobalStringPtr(builder, "%d\n", "format_str");
-
-
-
+    int registerNumber = 0;
 
     for (i = 0; i < numofpost; i++) {
         // If the current character is a number, push it onto the stack
@@ -531,79 +532,65 @@ LLVMBuilderRef builder = LLVMCreateBuilder();
         } else {
             int op1, op2;
             long long int result;
-            char op[32] = ""; //string to store operators,function names or variable names to print out result of that variable
+            char op[MAX_OP_LEN] = "";
             int j = 0;
             strcpy(op, postfix[i].value);
-            
-            
-            
-            
-            if(strcmp(postfix[i], "+") == 0) {
-            LLVMValueRef right = stack[top--];
-            LLVMValueRef left = stack[top--];
-            LLVMValueRef sum = LLVMBuildAdd(builder, left, right, "addtmp");
-            stack[++top] = sum;
-        }
-        else if(strcmp(postfix[i], "-") == 0) {
-            LLVMValueRef right = stack[top--];
-            LLVMValueRef left = stack[top--];
-            LLVMValueRef diff = LLVMBuildSub(builder, left, right, "subtmp");
-            stack[++top] = diff;
-        }
-        else if(strcmp(postfix[i], "*") == 0) {
-            LLVMValueRef right = stack[top--];
-            LLVMValueRef left = stack[top--];
-            LLVMValueRef prod = LLVMBuildMul(builder, left, right, "multmp");
-            stack[++top] = prod;
-        }
-        else if(strcmp(postfix[i], "/") == 0) {
-            LLVMValueRef right = stack[top--];
-            LLVMValueRef left = stack[top--];
-            LLVMValueRef quot = LLVMBuildSDiv(builder, left, right, "divtmp");
-            stack[++top] = quot;
-        }
-        else if(strcmp(postfix[i], "xor") == 0) {
-LLVMValueRef right = stack[top--];
-LLVMValueRef left = stack[top--];
-LLVMValueRef xor = LLVMBuildXor(builder, left, right, "xortmp");
-stack[++top] = xor;
-}
-    else if(strcmp(postfix[i], "|") == 0) {
-    LLVMValueRef right = stack[top--];
-    LLVMValueRef left = stack[top--];
-    LLVMValueRef or = LLVMBuildOr(builder, left, right, "ortmp");
-    stack[++top] = or;
-}
-       
-        else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) ==0) {
+
+            if (strcmp(postfix[i].value, "+") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = add i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "-") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = sub i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "*") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = mul i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "/") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = sdiv i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "xor") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = xor i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "|") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "%%register%d = or i32 %d, %d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                 LLVMValueRef val = LLVMBuildLoad(builder,result, "");
-                 stack[++top] = result;
-
-            } 
+                fprintf(fp, "%%register%d = load i32, i32* @%s\n", registerNumber++, op);
+            }
             else if (strcmp(op, ",") == 0) {
                 //skip
                 continue;
 
+            } else {
+                error = 1;
+                break;
             }
-        else {
-            LLVMValueRef val = LLVMConstInt(int32_type, atoi(postfix[i]), 0);
-            stack[++top] = val;
-        }
-
-        }
-    }
-    
-        
-    
-
-    LLVMBuildRet(builder, LLVMConstInt(int32_type, 0, 0));
-
-    LLVMDisposeBuilder(builder);
-
-    return module;
+        } //else ended
+    } //for loop ended
 }
+
+               
+
 
 long long int evaluate_postfix(Token *postfix) {
 
@@ -1085,8 +1072,7 @@ int main() {
             infix_to_postfix(tokens, postfixx);
 
             //long long int res = evaluate_postfix(postfixx);
-            LLVMModuleRef module = postfix_to_ir(postfixx);
-            write_module_to_stdout(module);
+           
 
 
             if (error == 1) {
