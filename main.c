@@ -41,18 +41,7 @@ int is_valid_operator(char *line, char *operator);
  * @param input str
  * @return balance value
  */
-void writeModuleToFile(LLVMModuleRef module, const char* filename) { //writing the  generated LLVM IR code
-    char *error = NULL;
-    LLVMBool result = LLVMWriteBitcodeToFile(module, filename);
-    if (result != 0) {
-        fprintf(stderr, "Error writing bitcode to file: %s\n", error);
-        LLVMDisposeMessage(error);
-    }
-}
 
-void write_module_to_stdout(LLVMModuleRef module) {
-    LLVMDumpModule(module);
-}
 
 
 
@@ -120,8 +109,7 @@ void insert(table *table, char *key,  long long int value) {
     while (table->elements[i].key != NULL && strcmp(table->elements[i].key, "") != 0) {
         if (strcmp(table->elements[i].key, key) == 0) {
              if (table->elements[i].assigned) {
-                error=1;
-                printf("Error: variable '%s' already assigned\n", key);
+                printf("Error: variable '%s' already  must be updated assigned\n", key);
                 return;
             }
             table->elements[i].value = value;
@@ -437,6 +425,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
     Token stack[MAX_EXPR_LEN];
     int top = -1;
     int i, j;
+    
 
     for (i = 0, j = 0; i < numtoken; i++) {
 
@@ -511,12 +500,16 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 #define MAX_EXPR_LEN 1000
 #define MAX_OP_LEN 32
 
-void postfix_to_ir(Token* postfix, char* filename) {
+void postfix_to_ir(Token* postfix) {
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
 
-    FILE* fp = fopen(filename, "w");
+     FILE *fp = fopen("output.ll", "w");
+    if(fp == NULL) {
+        printf("Error opening output file\n");
+        return;
+    }
 
     fprintf(fp, "; ModuleID = 'postfix_module'\n");
     fprintf(fp, "source_filename = \"postfix_module\"\n\n");
@@ -587,6 +580,9 @@ void postfix_to_ir(Token* postfix, char* filename) {
             }
         } //else ended
     } //for loop ended
+    printf("returning\n");
+    fclose(fp);
+    return;
 }
 
                
@@ -651,18 +647,6 @@ long long int evaluate_postfix(Token *postfix) {
                 stack[++top] = result;
 
             }
-            else if (strcmp(op, "-") == 0) {
-            op1 = stack[top--];
-            op2 = stack[top--];
-            result = LLVMBuildSub(builder, op2, op1, "subtmp");
-            stack[++top] = result;
-        }
-         else if (strcmp(op, "&") == 0) {
-            op1 = stack[top--];
-            op2 = stack[top--];
-            result = LLVMBuildAnd(builder, op2, op1, "andtmp");
-            stack[++top] = result;
-        }
             else if (strcmp(op, "|") == 0) {
                 op1 = stack[top--];
                 op2 = stack[top--];
@@ -712,6 +696,7 @@ long long int evaluate_postfix(Token *postfix) {
     if (top != 0) {
         error = 1;
     }
+   
     return stack[top];
 }
 
@@ -1040,9 +1025,9 @@ int main() {
                 continue;
             }
             //INSTEAD CALL LLVM IR TRANSLATOR
-           // long long int res = evaluate_postfix(postfixx);
-           LLVMModuleRef module = postfix_to_ir(postfixx);
-           write_module_to_stdout(module);
+            long long int res = evaluate_postfix(postfixx);
+            postfix_to_ir(postfixx);
+           
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
@@ -1071,7 +1056,8 @@ int main() {
 
             infix_to_postfix(tokens, postfixx);
 
-            //long long int res = evaluate_postfix(postfixx);
+            long long int res = evaluate_postfix(postfixx);
+            postfix_to_ir(postfixx);
            
 
 
