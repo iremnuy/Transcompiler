@@ -1,0 +1,4 @@
+; ModuleID = 'postfix_module'
+source_filename = "postfix_module"
+
+%register0 = add i32 4, 5

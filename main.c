@@ -500,20 +500,13 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 #define MAX_EXPR_LEN 1000
 #define MAX_OP_LEN 32
 
-void postfix_to_ir(Token* postfix) {
+void postfix_to_ir(Token* postfix,FILE *fp) {
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
 
-     FILE *fp = fopen("output.ll", "w");
-    if(fp == NULL) {
-        printf("Error opening output file\n");
-        return;
-    }
 
-    fprintf(fp, "; ModuleID = 'postfix_module'\n");
-    fprintf(fp, "source_filename = \"postfix_module\"\n\n");
-
+   
     int registerNumber = 0;
 
     for (i = 0; i < numofpost; i++) {
@@ -581,7 +574,6 @@ void postfix_to_ir(Token* postfix) {
         } //else ended
     } //for loop ended
     printf("returning\n");
-    fclose(fp);
     return;
 }
 
@@ -850,16 +842,22 @@ int is_valid_operator(char *line, char *op_name) {
 
 
 int main() {
+    FILE *inputFile,*outputFile;
+     inputFile = fopen("input.txt", "r");
+     outputFile= fopen("output.ll","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
+     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
+    fprintf(outputFile, "source_filename = \"postfix_module\"\n\n");
+
 
 
     char line[257] = ""; //input line will be stored in here
     printf(">");
 
     //start taking inputs
-    while (fgets(line, sizeof(line), stdin) !=NULL) {
+    while (fgets(line, sizeof(line), inputFile) !=NULL) {
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
@@ -1026,7 +1024,7 @@ int main() {
             }
             //INSTEAD CALL LLVM IR TRANSLATOR
             long long int res = evaluate_postfix(postfixx);
-            postfix_to_ir(postfixx);
+            postfix_to_ir(postfixx,outputFile);
            
 
             //add the result to the hashtable.
@@ -1057,7 +1055,7 @@ int main() {
             infix_to_postfix(tokens, postfixx);
 
             long long int res = evaluate_postfix(postfixx);
-            postfix_to_ir(postfixx);
+            postfix_to_ir(postfixx,outputFile);
            
 
 
@@ -1076,4 +1074,6 @@ int main() {
             continue;
         }
     }
+    fclose(inputFile);
+    fclose(outputFile);
 }
