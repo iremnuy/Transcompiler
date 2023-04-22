@@ -499,6 +499,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 
 #define MAX_EXPR_LEN 1000
 #define MAX_OP_LEN 32
+int registerNumber = 1;
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
     int stack[MAX_EXPR_LEN];
@@ -507,7 +508,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
 
 
    
-    int registerNumber = 0;
+    
 
     for (i = 0; i < numofpost; i++) {
         // If the current character is a number, push it onto the stack
@@ -525,43 +526,43 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             if (strcmp(postfix[i].value, "+") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = add i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = add i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "-") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = sub i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = sub i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "*") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = mul i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = mul i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "/") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = sdiv i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = sdiv i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "xor") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = xor i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "|") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%register%d = or i32 %d, %d\n", registerNumber++, left, right);
+                fprintf(fp, "%%%d = or i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                fprintf(fp, "%%register%d = load i32, i32* @%s\n", registerNumber++, op);
+                fprintf(fp, "%%%d = load i32, i32* @%s\n", registerNumber++, op);
             }
             else if (strcmp(op, ",") == 0) {
                 //skip
@@ -854,14 +855,15 @@ int main() {
 
 
     char line[257] = ""; //input line will be stored in here
-    printf(">");
+    //printf(">");
 
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
+        int lineNum=1;
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
-            printf(">");
+            //printf(">");
             continue;
         }
 
@@ -872,6 +874,7 @@ int main() {
         if (paranthesis_pos != NULL) {
             printf("Error!\n");
             printf(">");
+            //line num should be incremented by one
             continue;
         }
 
@@ -1025,12 +1028,14 @@ int main() {
             //INSTEAD CALL LLVM IR TRANSLATOR
             long long int res = evaluate_postfix(postfixx);
             postfix_to_ir(postfixx,outputFile);
+            fprintf(outputFile, "store i32 %%%d, i32* %s\n", registerNumber - 1,variable);
+
            
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
 
-            printf(">");
+           // printf(">");
             continue;
 
         }
@@ -1046,7 +1051,7 @@ int main() {
 
             //comment inputs
             if (numtok == 0) {
-                printf(">");
+               // printf(">");
                 error = 1;
                 continue;
             }
