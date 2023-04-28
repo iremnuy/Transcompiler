@@ -861,16 +861,81 @@ int main() {
     //printf(">");
 
     fprintf(outputFile, "define i32 @main() {\n");
+
+    //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
+    while (fgets(line, sizeof(line), inputFile) !=NULL) {
+        int lineNum = 1;
+
+        //ASSIGNMENT CHECK
+        char *pos = strchr(line, '=');
+
+        if (pos != NULL) { // if there is an assignment statement
+
+            *pos = '\0'; // replace = with \0
+            char *variable = line; // first part is the variable
+            char *value = pos + 1; // second part is the value
+
+            variable = trim(variable);
+            value = trim(value);
+            //if variable is assigned before give error for advcal2
+
+            //reserved keywords cannot be variable names.
+
+            if (!allAlpha(variable)) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("xor", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("ls", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("rs", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("rr", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("lr", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("not", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            }
+
+            //No errors so far, we have to allocate the memory for variable.
+            fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+        }
+    }
+
+    fclose(inputFile);
+    //reopen the file after our first scan for variables.
+    inputFile = fopen("input.txt", "r");
+
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        int lineNum=1;
+        int lineNum = 1;
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
             //printf(">");
             continue;
         }
-
 
         //erroneous inputs
         //1)empty paranthesis
@@ -1014,7 +1079,7 @@ int main() {
             }
 
             //No errors so far, we have to allocate the memory for variable.
-            fprintf(outputFile, "\t%%%s = alloca i32\n",variable);
+            //fprintf(outputFile, "\t%%%s = alloca i32\n",variable);
 
             //No error so far, we can evaluate the right-hand side of the assignment. i.e the expression part.
             Token postfixx[257];
