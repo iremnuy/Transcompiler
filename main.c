@@ -848,13 +848,13 @@ int is_valid_operator(char *line, char *op_name) {
 int main() {
     FILE *inputFile,*outputFile;
      inputFile = fopen("input.txt", "r");
-     outputFile= fopen("output.ll","w");
+     outputFile= fopen("output.txt","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
      fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
-    fprintf(outputFile, "source_filename = \"postfix_module\"\n\n");
-
+     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
+     fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
 
 
     char line[257] = ""; //input line will be stored in here
@@ -862,7 +862,6 @@ int main() {
 
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        printf('read 1 line');
         int lineNum=1;
 
         //blankline inputs
