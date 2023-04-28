@@ -4,6 +4,15 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+//LLVM IR definitions
+#define MAX_EXPR_LEN 1000
+#define MAX_OP_LEN 32
+int error = 0;
+
+
+int registerNumber = 1;
+
+
 
 //hashtable implementation
 #define TABLE_SIZE 128
@@ -42,9 +51,6 @@ int is_valid_operator(char *line, char *operator);
  * @return balance value
  */
 
-
-
-
 int is_balanced(char *str) {
     int len = strlen(str);
     char stack[len];
@@ -71,6 +77,7 @@ int is_balanced(char *str) {
  * @param key
  * @return hash value
  */
+
 int hash_function(char *key) {
     int hash = 0;
     int length = strlen(key);
@@ -94,7 +101,6 @@ void init_table(table *table) {
         table->elements[i].value = 0;
     }
 }
-
 
 /**
  * Function that adds an element to our hash table.
@@ -134,10 +140,6 @@ void insert(table *table, char *key,  long long int value) {
  * @param key
  * @return key's value
  */
-int error = 0;
-int MAX_EXPR_LEN = 257;
-
-
 
 long long int lookup(table *table, char *key) {
     int index = hash_function(key);
@@ -157,9 +159,6 @@ long long int lookup(table *table, char *key) {
 
     return 0;
 }
-
-
-
 
 
 
@@ -278,7 +277,7 @@ Token *tokenize(char *input, Token tokens[], int *num_tokens) {
             curr_char = input[i];
         }
 
-        else if (curr_char == '+' || curr_char == '-' || curr_char == '*') {
+        else if (curr_char == '+' || curr_char == '-' || curr_char == '*' || curr_char == '/' || curr_char == '%') {
             char *token_str = (char *) malloc(2);
             token_str[0] = curr_char;
             token_str[1] = '\0';
@@ -380,7 +379,8 @@ int precedence(char *op) {
              strcmp(op, "lr") == 0 || strcmp(op, "rr") == 0)
         return 5;
 
-    else if (strcmp(op, "*") == 0) {
+    //modulo might get mixed up with comment sign.
+    else if (strcmp(op, "*") == 0 || strcmp(op, "/") == 0  || strcmp(op, "%") == 0) {
         return 4;
     }
     else if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0)
@@ -425,7 +425,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
     Token stack[MAX_EXPR_LEN];
     int top = -1;
     int i, j;
-    
+
 
     for (i = 0, j = 0; i < numtoken; i++) {
 
@@ -479,36 +479,19 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 }
 
 
+
 /**
- * Function that evaluates the postfix expression.
- * @param postfix expression
- * @return long long int, result of the expression
+ * Function that translates AdvCalc++ language to LLVM IR.
+ * This is quite similar to the evaluation function but instead it does translation.
+ * @param postfix expression to be evaluated
+ * @param fp file pointer that points to the output file. This will be our LLVM IR source code.
  */
-
-
-
-/**
- * Writing Translator Function,very similar to evaluator but instead it interprets the operands and operators
- * 
- * 
-*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#define MAX_EXPR_LEN 1000
-#define MAX_OP_LEN 32
-int registerNumber = 1;
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
 
-
-   
-    
 
     for (i = 0; i < numofpost; i++) {
         // If the current character is a number, push it onto the stack
@@ -578,7 +561,14 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
     return;
 }
 
-               
+
+
+/**
+ * Function that evaluates the postfix expression.
+ * @param postfix expression
+ * @return long long int, result of the expression
+ */
+
 
 
 long long int evaluate_postfix(Token *postfix) {
@@ -621,7 +611,20 @@ long long int evaluate_postfix(Token *postfix) {
                 result = op2 * op1;
                 stack[++top] = result;
 
-            } else if (strcmp(op, "+") == 0) {
+            }else if (strcmp(op, "/") == 0) {
+                op1 = stack[top--];
+                op2 = stack[top--];
+                result = op2 / op1;
+                stack[++top] = result;
+            }
+            else if (strcmp(op, "%") == 0) {
+                op1 = stack[top--];
+                op2 = stack[top--];
+                result = op2 % op1;
+                stack[++top] = result;
+            }
+
+            else if (strcmp(op, "+") == 0) {
                 op1 = stack[top--];
                 op2 = stack[top--];
                 result = op2 + op1;
@@ -689,7 +692,7 @@ long long int evaluate_postfix(Token *postfix) {
     if (top != 0) {
         error = 1;
     }
-   
+
     return stack[top];
 }
 
@@ -859,6 +862,7 @@ int main() {
 
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
+        printf('read 1 line');
         int lineNum=1;
 
         //blankline inputs
@@ -1030,7 +1034,7 @@ int main() {
             postfix_to_ir(postfixx,outputFile);
             fprintf(outputFile, "store i32 %%%d, i32* %s\n", registerNumber - 1,variable);
 
-           
+
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
@@ -1061,7 +1065,7 @@ int main() {
 
             long long int res = evaluate_postfix(postfixx);
             postfix_to_ir(postfixx,outputFile);
-           
+
 
 
             if (error == 1) {
