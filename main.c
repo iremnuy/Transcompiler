@@ -1013,6 +1013,8 @@ int main() {
 
             }
 
+            //No errors so far, we have to allocate the memory for variable.
+            fprintf(outputFile, "\t%%%s = alloca i32\n",variable);
 
             //No error so far, we can evaluate the right-hand side of the assignment. i.e the expression part.
             Token postfixx[257];
