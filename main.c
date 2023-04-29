@@ -4,6 +4,12 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+
+
+////////////WAITING REVISIONS////////////////7
+//if a variable is uninit and directly written to a single line , print error instead of zero
+
+
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
 #define MAX_OP_LEN 32
@@ -151,8 +157,8 @@ long long int lookup(table *table, char *key) {
         }
         i = (i + 1) % table->size;
         if (i == index) {
-            //now it is an error in AdvCal++ give an error
-            error=1;
+            error=3; //special error when no assignment in line and identifier value itself expected and it is indeed uninitialized
+            //now it is an error in AdvCal++ give an error it is not zero anymore
             return 0;
         }
     }
@@ -893,7 +899,7 @@ int is_valid_operator(char *line, char *op_name) {
 int main() {
     FILE *inputFile,*outputFile;
     inputFile = fopen("input.txt", "r");
-    outputFile= fopen("output.txt","w");
+    outputFile= fopen("output.ll","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
@@ -906,10 +912,13 @@ int main() {
     //printf(">");
 
     fprintf(outputFile, "define i32 @main() {\n");
-
+    int lineNum = 1;
     //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        int lineNum = 1;
+        printf("line number is : %d  line is   :  ",lineNum);
+        printf(line);
+        printf("\n");
+
 
         //ASSIGNMENT CHECK
         char *pos = strchr(line, '=');
@@ -921,122 +930,126 @@ int main() {
             char *value = pos + 1; // second part is the value
 
             variable = trim(variable);
+            printf(variable);
+            printf("\n");
             value = trim(value);
             //if variable is assigned before give error for advcal2
 
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-                printf("Error!\n");
-                printf(">");
+                printf("alpha error\n");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("xor compare\n");
+
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
+            }else{
+                //No errors so far, we have to allocate the memory for variable.
+                fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+                lineNum++;
+                continue;
             }
 
-            //No errors so far, we have to allocate the memory for variable.
-            fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+
         }
     }
 
     fclose(inputFile);
     //reopen the file after our first scan for variables.
     inputFile = fopen("input.txt", "r");
+    lineNum=1;
 
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        int lineNum = 1;
+        printf(line);
+        printf("\n");
+
+        //int lineNum = 1;
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
-            //printf(">");
+            lineNum++;
             continue;
+
         }
 
         //erroneous inputs
         //1)empty paranthesis
         char *paranthesis_pos = strstr(line, "()");
         if (paranthesis_pos != NULL) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             //line num should be incremented by one
             continue;
         }
 
             //2)lines starting with operations. i.e unary cases like +1+b
         else if (line[0] == '+' || line[0] == '-' || line[0] == '*' || line[0] == '&' || line[0] == '|') {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
+
             continue;
         }
 
-        char *commentPos = strchr(line, '%');
-        if (commentPos != NULL) {
-            *commentPos = '\0'; //trim the expression to the % part included \0
-        }
+            /*char *commentPos = strchr(line, '%');
+            if (commentPos != NULL) {
+                *commentPos = '\0'; //trim the expression to the % part included \0
+            }
+            **/
 
 
             //3)unbalanced paranthesis expressions
         else if (!is_balanced(line)) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
+
             continue;
         }
 
             //4) broken function calls. We need to evalute the whole string for all the 5 functions.
 
         else if (!check_function(line, "xor")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
+
             continue;
 
         } else if (!check_function(line, "ls")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
+
             continue;
 
         } else if (!check_function(line, "rs")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!check_function(line, "rr")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!check_function(line, "lr")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
         }
 
@@ -1045,28 +1058,23 @@ int main() {
             //5) we won't allow operators inside paranthesis like 3(+)4
 
         else if (!is_valid_operator(line, "+")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!is_valid_operator(line, "-")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!is_valid_operator(line, "&")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!is_valid_operator(line, "*")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
 
         } else if (!is_valid_operator(line, "|")) {
-            printf("Error!\n");
-            printf(">");
+            printf("Error on line %d!\n",lineNum);lineNum++;
             continue;
         }
 
@@ -1087,38 +1095,33 @@ int main() {
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-                printf("Error!\n");
-                printf(">");
+                printf("alpha değil eror\n");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("çok değişik\n");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             }
@@ -1128,34 +1131,53 @@ int main() {
             Token tokens[257];
             int numtok = 0;
             tokenize(value, tokens, &numtok);
+            if (error == 1) {
+                printf("Error on line %d!\n",lineNum);lineNum++;
+                printf("token assgnm error\n");
+                error = 0; //reset
+                continue;
+            }
 
             infix_to_postfix(tokens, postfixx);
 
             //If there has been an error in tokenization.
             if (error == 1) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
+                printf("inf to post error assgnmnt\n");
                 error = 0; //reset
                 continue;
             }
-            //INSTEAD CALL LLVM IR TRANSLATOR
+            //ıf not CALL LLVM IR TRANSLATOR
             long long int res = evaluate_postfix(postfixx);
+            if (error == 1) {
+                printf("evaluate error assignment\n");
+                printf("Error on line %d!\n",lineNum);lineNum++;
+                error = 0; //reset
+                continue;
+            }
             postfix_to_ir(postfixx,outputFile);
+            if (error == 1) {
+                printf("Error on line %d!\n",lineNum);lineNum++;
+                error = 0; //reset
+                continue;
+            }
             fprintf(outputFile, "\tstore i32 %%%d, i32* %s\n", registerNumber - 1,variable);
 
 
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
+            printf("after insert line num %d",lineNum);
 
-            // printf(">");
+            lineNum++;
+            printf("line num is after ++ %d",lineNum);
             continue;
 
         }
 
             //EXPRESSION EVALUATION
-        else { //normal expression input exists. no assignment statement
-
+        else { //normal expression input exists. no assignment statement if numtok is one and lookup result is zero(uninit) return error
+            printf("normal expr");
             Token postfixx[257];
             Token tokens[257];
             int numtok = 0;
@@ -1164,39 +1186,62 @@ int main() {
 
             //comment inputs
             if (numtok == 0) {
-                // printf(">");
-                error = 1;
+                //error = 1;
+                printf("Error on line %d!\n",lineNum);lineNum++;
+
                 continue;
             }
 
             //if there is a single token and it is a variable, fetch the value.
             if (numtok == 1 && tokens[0].type == IDENT) {
-                int tokensRegister = tokens[0].register_number;
-                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d)\n",tokensRegister);
-                continue;
+                lookup(Hashtable,tokens[0].value);
+                if(error==3){
+                    printf("Error on line %d!\n",lineNum);lineNum++;
+                    error=0;
+                    continue;
+
+
+                }else{
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n"); //999 should  be tokens[0].regNumber
+                    lineNum++;
+                    continue;
+                }
             }
 
             else {
 
                 infix_to_postfix(tokens, postfixx);
+
                 long long int res = evaluate_postfix(postfixx);
+                printf("res this is %d \n",res);
                 postfix_to_ir(postfixx, outputFile);
+
                 if (!error) {
                     printf("%d\n", res);
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+                    lineNum++;
+                    continue;
+                }else{
+                    printf("called everything but error \n");
+                    printf("Error on line %d!\n",lineNum);
+                    lineNum++;
+                    continue;//error occured
+                    //added this -irem
+
                 }
-                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d)\n",registerNumber++);
+
+
             }
 
 
             if (error == 1) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum);lineNum++;
                 error = 0; //reset
                 continue;
             }
 
 
-            printf(">");
+            lineNum++;
             continue;
         }
     }
