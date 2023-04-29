@@ -1,0 +1,37 @@
+; ModuleID = 'advcalc2ir'
+declare i32 @printf(i8*, ...)
+@print.str = constant [4 x i8] c"%d\0A\00"
+
+define i32 @main() {
+	%x = alloca i32
+	%y = alloca i32
+	%zvalue = alloca i32
+	%k = alloca i32
+	%k = alloca i32
+	store i32 %0, i32* x
+	store i32 %0, i32* y
+	%1 = load i32, i32* @x
+	%2 = load i32, i32* @y
+	%3 = add i32 %d, %d
+	%4 = mul i32 %d, %d
+	%5 = add i32 %d, %d
+	store i32 %5, i32* zvalue
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )
+	%6 = load i32, i32* @x
+	%7 = load i32, i32* @y
+	%8 = sub i32 %d, %d
+	%9 = load i32, i32* @zvalue
+	%10 = sub i32 %d, %d
+	store i32 %10, i32* k
+	%11 = load i32, i32* @x
+	%12 = load i32, i32* @y
+	%13 = mul i32 %d, %d
+	%14 = add i32 %d, %d
+	%15 = mul i32 %d, %d
+	%16 = mul i32 %d, %d
+	%17 = add i32 %d, %d
+	store i32 %17, i32* k
+	%18 = load i32, i32* @k
+	%19 = add i32 %d, %d
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )
+}

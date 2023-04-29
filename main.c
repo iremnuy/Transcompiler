@@ -4,6 +4,15 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+//LLVM IR definitions
+#define MAX_EXPR_LEN 1000
+#define MAX_OP_LEN 32
+int error = 0;
+
+
+int registerNumber = 1;
+
+
 
 //hashtable implementation
 #define TABLE_SIZE 128
@@ -42,9 +51,6 @@ int is_valid_operator(char *line, char *operator);
  * @return balance value
  */
 
-
-
-
 int is_balanced(char *str) {
     int len = strlen(str);
     char stack[len];
@@ -71,6 +77,7 @@ int is_balanced(char *str) {
  * @param key
  * @return hash value
  */
+
 int hash_function(char *key) {
     int hash = 0;
     int length = strlen(key);
@@ -95,7 +102,6 @@ void init_table(table *table) {
     }
 }
 
-
 /**
  * Function that adds an element to our hash table.
  * @param table hashtable
@@ -108,12 +114,12 @@ void insert(table *table, char *key,  long long int value) {
     int i = index;
     while (table->elements[i].key != NULL && strcmp(table->elements[i].key, "") != 0) {
         if (strcmp(table->elements[i].key, key) == 0) {
-             if (table->elements[i].assigned) {
+            if (table->elements[i].assigned) {
                 printf("Error: variable '%s' already  must be updated assigned\n", key);
                 return;
             }
             table->elements[i].value = value;
-              table->elements[i].assigned = 1;
+            table->elements[i].assigned = 1;
             return;
         }
         i = (i + 1) % table->size;
@@ -134,10 +140,6 @@ void insert(table *table, char *key,  long long int value) {
  * @param key
  * @return key's value
  */
-int error = 0;
-int MAX_EXPR_LEN = 257;
-
-
 
 long long int lookup(table *table, char *key) {
     int index = hash_function(key);
@@ -157,9 +159,6 @@ long long int lookup(table *table, char *key) {
 
     return 0;
 }
-
-
-
 
 
 
@@ -278,7 +277,7 @@ Token *tokenize(char *input, Token tokens[], int *num_tokens) {
             curr_char = input[i];
         }
 
-        else if (curr_char == '+' || curr_char == '-' || curr_char == '*') {
+        else if (curr_char == '+' || curr_char == '-' || curr_char == '*' || curr_char == '/' || curr_char == '%') {
             char *token_str = (char *) malloc(2);
             token_str[0] = curr_char;
             token_str[1] = '\0';
@@ -380,7 +379,8 @@ int precedence(char *op) {
              strcmp(op, "lr") == 0 || strcmp(op, "rr") == 0)
         return 5;
 
-    else if (strcmp(op, "*") == 0) {
+        //modulo might get mixed up with comment sign.
+    else if (strcmp(op, "*") == 0 || strcmp(op, "/") == 0  || strcmp(op, "%") == 0) {
         return 4;
     }
     else if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0)
@@ -425,7 +425,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
     Token stack[MAX_EXPR_LEN];
     int top = -1;
     int i, j;
-    
+
 
     for (i = 0, j = 0; i < numtoken; i++) {
 
@@ -479,36 +479,19 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 }
 
 
+
 /**
- * Function that evaluates the postfix expression.
- * @param postfix expression
- * @return long long int, result of the expression
+ * Function that translates AdvCalc++ language to LLVM IR.
+ * This is quite similar to the evaluation function but instead it does translation.
+ * @param postfix expression to be evaluated
+ * @param fp file pointer that points to the output file. This will be our LLVM IR source code.
  */
-
-
-
-/**
- * Writing Translator Function,very similar to evaluator but instead it interprets the operands and operators
- * 
- * 
-*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#define MAX_EXPR_LEN 1000
-#define MAX_OP_LEN 32
-int registerNumber = 1;
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
 
-
-   
-    
 
     for (i = 0; i < numofpost; i++) {
         // If the current character is a number, push it onto the stack
@@ -526,43 +509,86 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             if (strcmp(postfix[i].value, "+") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = add i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = add i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "-") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = sub i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = sub i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "*") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = mul i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = mul i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "/") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = sdiv i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = sdiv i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+            else if (strcmp(postfix[i].value, "%") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = srem i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "xor") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
+
+            else if (strcmp(postfix[i].value, "not") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = xor i32 %%d, -1\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "ls") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = shl i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "rs") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = lshr i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "lr") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = rotl i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "rr") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = rotr i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+
             else if (strcmp(postfix[i].value, "|") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "%%%d = or i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = or i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                fprintf(fp, "%%%d = load i32, i32* @%s\n", registerNumber++, op);
+                fprintf(fp, "\t%%%d = load i32, i32* @%s\n", registerNumber++, op);
             }
             else if (strcmp(op, ",") == 0) {
                 //skip
@@ -578,7 +604,14 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
     return;
 }
 
-               
+
+
+/**
+ * Function that evaluates the postfix expression.
+ * @param postfix expression
+ * @return long long int, result of the expression
+ */
+
 
 
 long long int evaluate_postfix(Token *postfix) {
@@ -621,7 +654,20 @@ long long int evaluate_postfix(Token *postfix) {
                 result = op2 * op1;
                 stack[++top] = result;
 
-            } else if (strcmp(op, "+") == 0) {
+            }else if (strcmp(op, "/") == 0) {
+                op1 = stack[top--];
+                op2 = stack[top--];
+                result = op2 / op1;
+                stack[++top] = result;
+            }
+            else if (strcmp(op, "%") == 0) {
+                op1 = stack[top--];
+                op2 = stack[top--];
+                result = op2 % op1;
+                stack[++top] = result;
+            }
+
+            else if (strcmp(op, "+") == 0) {
                 op1 = stack[top--];
                 op2 = stack[top--];
                 result = op2 + op1;
@@ -689,7 +735,7 @@ long long int evaluate_postfix(Token *postfix) {
     if (top != 0) {
         error = 1;
     }
-   
+
     return stack[top];
 }
 
@@ -844,28 +890,94 @@ int is_valid_operator(char *line, char *op_name) {
 
 int main() {
     FILE *inputFile,*outputFile;
-     inputFile = fopen("input.txt", "r");
-     outputFile= fopen("output.ll","w");
+    inputFile = fopen("input.txt", "r");
+    outputFile= fopen("output.txt","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
-     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
-    fprintf(outputFile, "source_filename = \"postfix_module\"\n\n");
-
+    fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
+    fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
+    fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
 
 
     char line[257] = ""; //input line will be stored in here
     //printf(">");
 
+    fprintf(outputFile, "define i32 @main() {\n");
+
+    //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
+    while (fgets(line, sizeof(line), inputFile) !=NULL) {
+        int lineNum = 1;
+
+        //ASSIGNMENT CHECK
+        char *pos = strchr(line, '=');
+
+        if (pos != NULL) { // if there is an assignment statement
+
+            *pos = '\0'; // replace = with \0
+            char *variable = line; // first part is the variable
+            char *value = pos + 1; // second part is the value
+
+            variable = trim(variable);
+            value = trim(value);
+            //if variable is assigned before give error for advcal2
+
+            //reserved keywords cannot be variable names.
+
+            if (!allAlpha(variable)) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("xor", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("ls", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("rs", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("rr", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("lr", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            } else if (strcmp("not", variable) == 0) {
+                printf("Error!\n");
+                printf(">");
+                continue;
+
+            }
+
+            //No errors so far, we have to allocate the memory for variable.
+            fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+        }
+    }
+
+    fclose(inputFile);
+    //reopen the file after our first scan for variables.
+    inputFile = fopen("input.txt", "r");
+
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        int lineNum=1;
+        int lineNum = 1;
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
             continue;
         }
-
 
         //erroneous inputs
         //1)empty paranthesis
@@ -989,7 +1101,6 @@ int main() {
 
             }
 
-
             //No error so far, we can evaluate the right-hand side of the assignment. i.e the expression part.
             Token postfixx[257];
             Token tokens[257];
@@ -1007,12 +1118,17 @@ int main() {
             //ıf not CALL LLVM IR TRANSLATOR
             long long int res = evaluate_postfix(postfixx);
             postfix_to_ir(postfixx,outputFile);
-            fprintf(outputFile, "store i32 %%%d, i32* %s\n", registerNumber - 1,variable);
+            fprintf(outputFile, "\tstore i32 %%%d, i32* %s\n", registerNumber - 1,variable);
 
-           
+
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
+<<<<<<< HEAD
+=======
+
+            // printf(">");
+>>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
             continue;
 
         }
@@ -1028,16 +1144,31 @@ int main() {
 
             //comment inputs
             if (numtok == 0) {
+<<<<<<< HEAD
                 error = 1; //maybe we should directly write error???-irem
+=======
+                // printf(">");
+                error = 1;
+>>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
                 continue;
             }
 
+            //if there is a single token and it is a variable, fetch the value.
+            if (numtok == 1 && tokens[0].type == IDENT) {
+                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+                continue;
+            }
 
-            infix_to_postfix(tokens, postfixx);
+            else {
 
-            long long int res = evaluate_postfix(postfixx);
-            postfix_to_ir(postfixx,outputFile);
-           
+                infix_to_postfix(tokens, postfixx);
+                long long int res = evaluate_postfix(postfixx);
+                postfix_to_ir(postfixx, outputFile);
+                if (!error) {
+                    printf("%d\n", res);
+                }
+                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+            }
 
 
             if (error == 1) {
@@ -1046,12 +1177,18 @@ int main() {
                 continue;
             }
 
+<<<<<<< HEAD
             if (!error) {
                 printf("%d\n", res);
             }
+=======
+
+            printf(">");
+>>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
             continue;
         }
     }
+    fprintf(outputFile, "}\n");
     fclose(inputFile);
     fclose(outputFile);
 }
