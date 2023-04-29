@@ -1180,7 +1180,7 @@ int main() {
                 error = 0; //reset
                 continue;
             }
-            fprintf(outputFile, "\tstore i32 %%%d, i32* %s\n", registerNumber - 1,variable);
+            fprintf(outputFile, "\tstore i32 %d, i32* %%%s\n", res,variable);
 
 
 
