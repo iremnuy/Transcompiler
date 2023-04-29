@@ -114,12 +114,12 @@ void insert(table *table, char *key,  long long int value) {
     int i = index;
     while (table->elements[i].key != NULL && strcmp(table->elements[i].key, "") != 0) {
         if (strcmp(table->elements[i].key, key) == 0) {
-             if (table->elements[i].assigned) {
+            if (table->elements[i].assigned) {
                 printf("Error: variable '%s' already  must be updated assigned\n", key);
                 return;
             }
             table->elements[i].value = value;
-              table->elements[i].assigned = 1;
+            table->elements[i].assigned = 1;
             return;
         }
         i = (i + 1) % table->size;
@@ -379,7 +379,7 @@ int precedence(char *op) {
              strcmp(op, "lr") == 0 || strcmp(op, "rr") == 0)
         return 5;
 
-    //modulo might get mixed up with comment sign.
+        //modulo might get mixed up with comment sign.
     else if (strcmp(op, "*") == 0 || strcmp(op, "/") == 0  || strcmp(op, "%") == 0) {
         return 4;
     }
@@ -536,6 +536,35 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 fprintf(fp, "\t%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
+            else if (strcmp(postfix[i].value, "ls") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = shl i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "rs") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = lshr i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "lr") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = rotl i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+            else if (strcmp(postfix[i].value, "rr") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = rotr i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
+
             else if (strcmp(postfix[i].value, "|") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
@@ -847,14 +876,14 @@ int is_valid_operator(char *line, char *op_name) {
 
 int main() {
     FILE *inputFile,*outputFile;
-     inputFile = fopen("input.txt", "r");
-     outputFile= fopen("output.txt","w");
+    inputFile = fopen("input.txt", "r");
+    outputFile= fopen("output.txt","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
-     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
-     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
-     fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
+    fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
+    fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
+    fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
 
 
     char line[257] = ""; //input line will be stored in here
@@ -1106,7 +1135,7 @@ int main() {
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
 
-           // printf(">");
+            // printf(">");
             continue;
 
         }
@@ -1122,7 +1151,7 @@ int main() {
 
             //comment inputs
             if (numtok == 0) {
-               // printf(">");
+                // printf(">");
                 error = 1;
                 continue;
             }
