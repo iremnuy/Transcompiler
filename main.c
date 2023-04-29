@@ -530,12 +530,26 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 fprintf(fp, "\t%%%d = sdiv i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
+            else if (strcmp(postfix[i].value, "%") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = srem i32 %%d, %%d\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
             else if (strcmp(postfix[i].value, "xor") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
                 fprintf(fp, "\t%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
+
+            else if (strcmp(postfix[i].value, "not") == 0) {
+                int right = stack[top--];
+                int left = stack[top--];
+                fprintf(fp, "\t%%%d = xor i32 %%d, -1\n", registerNumber++, left, right);
+                stack[++top] = registerNumber - 1;
+            }
+
             else if (strcmp(postfix[i].value, "ls") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
