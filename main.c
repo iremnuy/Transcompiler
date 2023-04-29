@@ -539,7 +539,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 fprintf(fp, "\t%%%d = sdiv i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
-            else if (strcmp(postfix[i].value, "%") == 0) {
+            else if (strcmp(postfix[i].value, "%%") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
                 fprintf(fp, "\t%%%d = srem i32 %%%d, %%%d\n", registerNumber++, left, right);
@@ -591,13 +591,15 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             else if (strcmp(postfix[i].value, "|") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = or i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = or i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
                 fprintf(fp, "\t%%%d = load i32, i32* %%%s\n", registerNumber++, op);
+                 //RegNum = lookup(Hashtable,op);
+                 //stack[++top] = RegNum;  
             }
             else if (strcmp(op, ",") == 0) {
                 //skip
@@ -609,7 +611,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
         } //else ended
     } //for loop ended
-    printf("returning\n");
+    printf("returnin\n");
     return;
 }
 
@@ -729,7 +731,7 @@ long long int evaluate_postfix(Token *postfix) {
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) ==0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                stack[++top] = result;
+                stack[++top] = result; 
 
             } else if (strcmp(op, ",") == 0) {
                 //skip
@@ -1187,6 +1189,7 @@ int main() {
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
             printf("after insert line num %d",lineNum);
+            //insert(HashTableForReg,variable,reg)
 
             lineNum++;
             printf("line num is after ++ %d",lineNum);
