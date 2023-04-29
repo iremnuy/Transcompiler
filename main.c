@@ -1121,9 +1121,6 @@ int main() {
 
             }
 
-            //No errors so far, we have to allocate the memory for variable.
-            //fprintf(outputFile, "\t%%%s = alloca i32\n",variable);
-
             //No error so far, we can evaluate the right-hand side of the assignment. i.e the expression part.
             Token postfixx[257];
             Token tokens[257];
@@ -1170,12 +1167,22 @@ int main() {
                 continue;
             }
 
+            //if there is a single token and it is a variable, fetch the value.
+            if (numtok == 1 && tokens[0].type == IDENT) {
+                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+                continue;
+            }
 
-            infix_to_postfix(tokens, postfixx);
+            else {
 
-            long long int res = evaluate_postfix(postfixx);
-            postfix_to_ir(postfixx,outputFile);
-
+                infix_to_postfix(tokens, postfixx);
+                long long int res = evaluate_postfix(postfixx);
+                postfix_to_ir(postfixx, outputFile);
+                if (!error) {
+                    printf("%d\n", res);
+                }
+                fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+            }
 
 
             if (error == 1) {
@@ -1185,9 +1192,6 @@ int main() {
                 continue;
             }
 
-            if (!error) {
-                printf("%d\n", res);
-            }
 
             printf(">");
             continue;
