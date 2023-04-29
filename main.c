@@ -7,7 +7,7 @@
 
 
 ////////////WAITING REVISIONS////////////////7
-//if a variable is uninit and directly written to a single line , print error instead of zero
+//if a variable is uninit and directly written to a single line , print error instead of zero - DONE
 
 
 //LLVM IR definitions
@@ -156,14 +156,15 @@ long long int lookup(table *table, char *key) {
             //NO ASSIGMENT MORE THAN ONCE SO IF LHS OF THE ASSIGMENT İS HERE THEN GİVE ERROR
         }
         i = (i + 1) % table->size;
+
         if (i == index) {
-            error=3; //special error when no assignment in line and identifier value itself expected and it is indeed uninitialized
-            //now it is an error in AdvCal++ give an error it is not zero anymore
-            return 0;
+            //we have reaached the starting index.
+            //no variable found returning a dummy for an error in AdvCalc++
+            error=1;
+            return 999999;
         }
     }
-
-    return 0;
+    return 999999;
 }
 
 
@@ -596,7 +597,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                fprintf(fp, "\t%%%d = load i32, i32* @%s\n", registerNumber++, op);
+                fprintf(fp, "\t%%%d = load i32, i32* %%%s\n", registerNumber++, op);
             }
             else if (strcmp(op, ",") == 0) {
                 //skip
@@ -1194,9 +1195,12 @@ int main() {
 
             //if there is a single token and it is a variable, fetch the value.
             if (numtok == 1 && tokens[0].type == IDENT) {
-                lookup(Hashtable,tokens[0].value);
-                if(error==3){
-                    printf("Error on line %d!\n",lineNum);lineNum++;
+
+                //if it is not initialized, it is an error.
+                int result = lookup(Hashtable,tokens[0].value);
+
+                if(result == 999999){
+                    printf("Error on line %d! UNITIALIZED VARIABLE CALLED\n",lineNum);lineNum++;
                     error=0;
                     continue;
 
