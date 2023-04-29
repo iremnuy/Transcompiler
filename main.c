@@ -4,6 +4,12 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+
+
+////////////WAITING REVISIONS////////////////7
+//if a variable is uninit and directly written to a single line , print error instead of zero
+
+
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
 #define MAX_OP_LEN 32
