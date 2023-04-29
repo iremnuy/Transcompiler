@@ -891,7 +891,7 @@ int is_valid_operator(char *line, char *op_name) {
 int main() {
     FILE *inputFile,*outputFile;
     inputFile = fopen("input.txt", "r");
-    outputFile= fopen("output.txt","w");
+    outputFile= fopen("output.ll","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
@@ -925,38 +925,31 @@ int main() {
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
-                printf("Error!\n");
-                printf(">");
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             }
@@ -983,14 +976,14 @@ int main() {
         //1)empty paranthesis
         char *paranthesis_pos = strstr(line, "()");
         if (paranthesis_pos != NULL) {
-            printf("Error on line ½d!\n",lineNum++);
+            printf("Error on line %d!\n",lineNum++);
             //line num should be incremented by one
             continue;
         }
 
             //2)lines starting with operations. i.e unary cases like +1+b
         else if (line[0] == '+' || line[0] == '-' || line[0] == '*' || line[0] == '&' || line[0] == '|') {
-            printf("Error on line ½d!\n",lineNum++);
+            printf("Error on line %d!\n",lineNum++);
             continue;
         }
 
@@ -1002,31 +995,31 @@ int main() {
 
             //3)unbalanced paranthesis expressions
         else if (!is_balanced(line)) {
-            printf("Error on line ½d!\n",lineNum++);
+            printf("Error on line %d!\n",lineNum++);
             continue;
         }
 
             //4) broken function calls. We need to evalute the whole string for all the 5 functions.
 
         else if (!check_function(line, "xor")) {
-            printf("Error on line ½d!\n",lineNum++);
+            printf("Error on line %d!\n",lineNum++);
     
             continue;
 
         } else if (!check_function(line, "ls")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!check_function(line, "rs")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!check_function(line, "rr")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!check_function(line, "lr")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
         }
 
@@ -1035,23 +1028,23 @@ int main() {
             //5) we won't allow operators inside paranthesis like 3(+)4
 
         else if (!is_valid_operator(line, "+")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!is_valid_operator(line, "-")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!is_valid_operator(line, "&")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!is_valid_operator(line, "*")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
 
         } else if (!is_valid_operator(line, "|")) {
-            printf("Error on line ½d!\n",lineNum);
+            printf("Error on line %d!\n",lineNum++);
             continue;
         }
 
@@ -1072,31 +1065,31 @@ int main() {
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-               printf("Error on line ½d!\n",lineNum);
+               printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 continue;
 
             }
@@ -1111,7 +1104,7 @@ int main() {
 
             //If there has been an error in tokenization.
             if (error == 1) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 error = 0; //reset
                 continue;
             }
@@ -1124,11 +1117,8 @@ int main() {
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
-<<<<<<< HEAD
-=======
 
             // printf(">");
->>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
             continue;
 
         }
@@ -1144,12 +1134,8 @@ int main() {
 
             //comment inputs
             if (numtok == 0) {
-<<<<<<< HEAD
-                error = 1; //maybe we should directly write error???-irem
-=======
                 // printf(">");
                 error = 1;
->>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
                 continue;
             }
 
@@ -1172,19 +1158,13 @@ int main() {
 
 
             if (error == 1) {
-                printf("Error on line ½d!\n",lineNum);
+                printf("Error on line %d!\n",lineNum++);
                 error = 0; //reset
                 continue;
             }
 
-<<<<<<< HEAD
-            if (!error) {
-                printf("%d\n", res);
-            }
-=======
 
             printf(">");
->>>>>>> f77b3d7b59291823f83cfe5c3db35a62c2911280
             continue;
         }
     }
