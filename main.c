@@ -914,6 +914,15 @@ int main() {
 
     fprintf(outputFile, "define i32 @main() {\n");
     int lineNum = 1;
+
+
+    /**
+     * var table keeps track of variables so that we do not allocate space for the same variable twice.
+     */
+    table* varTable;
+    varTable = (table *) malloc(sizeof(table));
+    init_table(varTable);
+
     //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
         printf("line number is : %d  line is   :  ",lineNum);
@@ -970,17 +979,26 @@ int main() {
                 continue;
 
             }else{
-                //No errors so far, we have to allocate the memory for variable.
-                fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
-                lineNum++;
-                continue;
+                //No errors so far, we have to collect the variable and allocate space for it.
+                //checking whether have we seen this variable before.
+                int presence = lookup(varTable,variable);
+                if(presence == 999999){
+                    //if not encountered before, add it to the variables and allocate space.
+                    insert(varTable,variable,100); //dummy value to check presence.
+                    fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+                    lineNum++;
+                    continue;
+                }
             }
 
 
         }
     }
 
+    //allocation ends, we free the varTable.
+    free(varTable);
     fclose(inputFile);
+
     //reopen the file after our first scan for variables.
     inputFile = fopen("input.txt", "r");
     lineNum=1;
