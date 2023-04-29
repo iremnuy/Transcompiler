@@ -518,72 +518,72 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             if (strcmp(postfix[i].value, "+") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = add i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = add i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "-") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = sub i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = sub i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "*") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = mul i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = mul i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "/") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = sdiv i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = sdiv i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "%") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = srem i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = srem i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
             else if (strcmp(postfix[i].value, "xor") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = xor i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = xor i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
             else if (strcmp(postfix[i].value, "not") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = xor i32 %%d, -1\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = xor i32 %%%d, -1\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
             else if (strcmp(postfix[i].value, "ls") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = shl i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = shl i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
             else if (strcmp(postfix[i].value, "rs") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = lshr i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = lshr i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
             else if (strcmp(postfix[i].value, "lr") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = rotl i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = rotl i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
             else if (strcmp(postfix[i].value, "rr") == 0) {
                 int right = stack[top--];
                 int left = stack[top--];
-                fprintf(fp, "\t%%%d = rotr i32 %%d, %%d\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = rotr i32 %%%d, %%%d\n", registerNumber++, left, right);
                 stack[++top] = registerNumber - 1;
             }
 
@@ -669,7 +669,7 @@ long long int evaluate_postfix(Token *postfix) {
                 result = op2 / op1;
                 stack[++top] = result;
             }
-            else if (strcmp(op, "%") == 0) {
+            else if (strcmp(op, "%%") == 0) {
                 op1 = stack[top--];
                 op2 = stack[top--];
                 result = op2 % op1;
