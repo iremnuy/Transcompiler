@@ -21,7 +21,6 @@
  * store method:
  * if a variable is encountered, result is given in a new register.
  * else only the result.
- *
  */
 
 
@@ -619,6 +618,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 int reg = lookup(registerTable,op);
                 varExist = 1;
                 stack[++top] =  reg;
+                printf("reg is :%d  op is: %s \n",reg,op);
 
 
             }
@@ -1213,8 +1213,8 @@ int main() {
                 if(tokens[k].type == IDENT){
                     insert(registerTable,tokens[k].value,registerNumber);
                     int reg = lookup(registerTable,tokens[k].value);
-                    registerNumber++;
                     fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
+                    registerNumber++;
                     //we have to record this register for future calls.
                 }
                 else{
