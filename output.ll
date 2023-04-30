@@ -1,28 +1,29 @@
 ; ModuleID = 'advcalc2ir'
-source_filename = "postfix_module"
+declare i32 @printf(i8*, ...)
+@print.str = constant [4 x i8] c"%d\0A\00"
 
-store i32 %0, i32* x
-store i32 %0, i32* y
-%1 = load i32, i32* @x
-%2 = load i32, i32* @y
-%3 = add i32 %d, %d
-%4 = mul i32 %d, %d
-%5 = add i32 %d, %d
-store i32 %5, i32* zvalue
-%6 = load i32, i32* @zvalue
-%7 = load i32, i32* @x
-%8 = load i32, i32* @y
-%9 = sub i32 %d, %d
-%10 = load i32, i32* @zvalue
-%11 = sub i32 %d, %d
-store i32 %11, i32* k
-%12 = load i32, i32* @x
-%13 = load i32, i32* @y
-%14 = mul i32 %d, %d
-%15 = add i32 %d, %d
-%16 = mul i32 %d, %d
-%17 = mul i32 %d, %d
-%18 = add i32 %d, %d
-store i32 %18, i32* k
-%19 = load i32, i32* @k
-%20 = add i32 %d, %d
+define i32 @main() {
+	%siu = alloca i32
+	%siuuu = alloca i32
+	store i32 11, i32* %siu
+	store i32 7, i32* %siuuu
+	%3 = load i32, i32* %siu
+	%4 = load i32, i32* %siuuu
+	%5 = sdiv i32 %0, %0
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32  )
+	%8 = load i32, i32* %siu
+	%9 = load i32, i32* %siuuu
+	%10 = mul i32 %0, %0
+	store i32 77, i32* %siu
+	%16 = load i32, i32* %siu
+	%17 = load i32, i32* %siu
+	%18 = sub i32 %0, %0
+	%19 = load i32, i32* %siu
+	%20 = load i32, i32* %siu
+	%21 = mul i32 %0, %0
+	%22 = load i32, i32* %siu
+	%23 = sdiv i32 %0, %0
+	%24 = add i32 %0, %0
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32  )
+	ret i32 0
+}
