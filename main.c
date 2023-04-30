@@ -7,7 +7,22 @@
 
 
 ////////////WAITING REVISIONS////////////////7
-//if a variable is uninit and directly written to a single line , print error instead of zero - DONE
+/**
+ * add should be addjusted
+ * integers should not be printed with %
+ *register should be printed with %
+ */
+
+/**
+ * multiplication is done on wrong registers. register table should be used
+ */
+
+/**
+ * store method:
+ * if a variable is encountered, result is given in a new register.
+ * else only the result.
+ *
+ */
 
 
 //LLVM IR definitions
@@ -17,7 +32,7 @@ int error = 0;
 
 
 int registerNumber = 1;
-
+int varExist = 0;
 
 
 //hashtable implementation
@@ -499,10 +514,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
 
-    //initializing the register table
-
-    registerTable = (table *) malloc(sizeof(table));
-    init_table(registerTable);
+    varExist = 0;
 
     int stack[MAX_EXPR_LEN];
     int top = -1;
@@ -603,8 +615,10 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
-                result = lookup(Hashtable,op);
-                stack[++top] =  registerNumber - 1;
+                //result = lookup(Hashtable,op);
+                int reg = lookup(registerTable,op);
+                varExist = 1;
+                stack[++top] =  reg;
 
 
             }
@@ -913,6 +927,10 @@ int main() {
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
+
+
+
+
     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
     fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
@@ -1014,6 +1032,11 @@ int main() {
 
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
+        //initializing the register table
+
+        registerTable = (table *) malloc(sizeof(table));
+        init_table(registerTable);
+
         printf(line);
         printf("\n");
 
@@ -1189,7 +1212,9 @@ int main() {
             for(int k = 0 ; k<257; k++){
                 if(tokens[k].type == IDENT){
                     insert(registerTable,tokens[k].value,registerNumber);
-                    fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n", registerNumber++, tokens[k].value);
+                    int reg = lookup(registerTable,tokens[k].value);
+                    registerNumber++;
+                    fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
                     //we have to record this register for future calls.
                 }
                 else{
@@ -1199,13 +1224,26 @@ int main() {
 
 
             postfix_to_ir(postfixx,outputFile);
+
+
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 error = 0; //reset
                 continue;
             }
-            fprintf(outputFile, "\tstore i32 %d, i32* %%%s\n", res,variable);
 
+            /**
+             * if assignment -> res
+             * else -> regnumber
+             *
+             */
+
+            if(varExist ==1 ) {
+                fprintf(outputFile, "\tstore i32 %%%d, i32* %%%s\n", registerNumber-1, variable);
+            }
+            else{
+                fprintf(outputFile, "\tstore i32 %d, i32* %%%s\n", res, variable);
+            }
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
