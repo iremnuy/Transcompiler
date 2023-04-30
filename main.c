@@ -35,6 +35,7 @@ typedef struct {
 } table;
 
 table *Hashtable;
+table *registerTable;
 
 int hash_function(char *key);
 
@@ -260,7 +261,7 @@ Token *tokenize(char *input, Token tokens[], int *num_tokens) {
 
             else {
                 tokens[*num_tokens] = create_token(IDENT, token_str);
-                tokens[*num_tokens].register_number = registerNumber++;
+                //tokens[*num_tokens].register_number = registerNumber++;
             }
 
             (*num_tokens)++;
@@ -497,6 +498,12 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
  */
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
+
+    //initializing the register table
+
+    registerTable = (table *) malloc(sizeof(table));
+    init_table(registerTable);
+
     int stack[MAX_EXPR_LEN];
     int top = -1;
     int i;
@@ -597,9 +604,9 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                fprintf(fp, "\t%%%d = load i32, i32* %%%s\n", registerNumber++, op);
-                 //RegNum = lookup(Hashtable,op);
-                 //stack[++top] = RegNum;  
+                stack[++top] =  registerNumber - 1;
+
+
             }
             else if (strcmp(op, ",") == 0) {
                 //skip
@@ -611,7 +618,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
         } //else ended
     } //for loop ended
-    printf("returnin\n");
+    printf("returning\n");
     return;
 }
 
@@ -731,7 +738,7 @@ long long int evaluate_postfix(Token *postfix) {
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) ==0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 result = lookup(Hashtable,op);
-                stack[++top] = result; 
+                stack[++top] = result;
 
             } else if (strcmp(op, ",") == 0) {
                 //skip
@@ -1176,6 +1183,21 @@ int main() {
                 error = 0; //reset
                 continue;
             }
+
+
+            //before doing postfix to ir, we have to load all variables to registers.
+            for(int k = 0 ; k<257; k++){
+                if(tokens[k].type == IDENT){
+                    insert(registerTable,tokens[k].value,registerNumber);
+                    fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n", registerNumber++, tokens[k].value);
+                    //we have to record this register for future calls.
+                }
+                else{
+                    continue;
+                }
+            }
+
+
             postfix_to_ir(postfixx,outputFile);
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
@@ -1185,11 +1207,9 @@ int main() {
             fprintf(outputFile, "\tstore i32 %d, i32* %%%s\n", res,variable);
 
 
-
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
             printf("after insert line num %d",lineNum);
-            //insert(HashTableForReg,variable,reg)
 
             lineNum++;
             printf("line num is after ++ %d",lineNum);
@@ -1227,7 +1247,11 @@ int main() {
 
 
                 }else{
-                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n"); //999 should  be tokens[0].regNumber
+                    //fetch the register number
+
+                    insert(registerTable,tokens[0].value,registerNumber);
+                    fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n", registerNumber, tokens[0].value);
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d)\n",registerNumber++);
                     lineNum++;
                     continue;
                 }
@@ -1243,7 +1267,7 @@ int main() {
 
                 if (!error) {
                     printf("%d\n", res);
-                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %999 )\n");
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber++);
                     lineNum++;
                     continue;
                 }else{
