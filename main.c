@@ -135,12 +135,12 @@ void insert(table *table, char *key,  long long int value) {
     int i = index;
     while (table->elements[i].key != NULL && strcmp(table->elements[i].key, "") != 0) {
         if (strcmp(table->elements[i].key, key) == 0) {
-            if (table->elements[i].assigned) {
+             if (table->elements[i].assigned) {
                 printf("Error: variable '%s' already  must be updated assigned\n", key);
                 return;
             }
             table->elements[i].value = value;
-            table->elements[i].assigned = 1;
+              table->elements[i].assigned = 1;
             return;
         }
         i = (i + 1) % table->size;
@@ -449,7 +449,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
     Token stack[MAX_EXPR_LEN];
     int top = -1;
     int i, j;
-
+    
 
     for (i = 0, j = 0; i < numtoken; i++) {
 
@@ -509,7 +509,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
  * This is quite similar to the evaluation function but instead it does translation.
  * @param postfix expression to be evaluated
  * @param fp file pointer that points to the output file. This will be our LLVM IR source code.
- */
+*/
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
 
@@ -636,7 +636,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
     return;
 }
 
-
+               
 
 /**
  * Function that evaluates the postfix expression.
@@ -767,7 +767,7 @@ long long int evaluate_postfix(Token *postfix) {
     if (top != 0) {
         error = 1;
     }
-
+   
     return stack[top];
 }
 
@@ -922,8 +922,8 @@ int is_valid_operator(char *line, char *op_name) {
 
 int main() {
     FILE *inputFile,*outputFile;
-    inputFile = fopen("input.txt", "r");
-    outputFile= fopen("output.ll","w");
+     inputFile = fopen("input.txt", "r");
+     outputFile= fopen("output.ll","w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
@@ -931,7 +931,7 @@ int main() {
 
 
 
-    fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
+     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
     fprintf(outputFile, "@print.str = constant [4 x i8] c\"%%d\\0A\\00\"\n\n");
 
@@ -1066,9 +1066,9 @@ int main() {
         }
 
             /*char *commentPos = strchr(line, '%');
-            if (commentPos != NULL) {
-                *commentPos = '\0'; //trim the expression to the % part included \0
-            }
+        if (commentPos != NULL) {
+            *commentPos = '\0'; //trim the expression to the % part included \0
+        }
             **/
 
 
@@ -1225,7 +1225,7 @@ int main() {
 
             postfix_to_ir(postfixx,outputFile);
 
-
+           
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 error = 0; //reset
@@ -1297,12 +1297,12 @@ int main() {
 
             else {
 
-                infix_to_postfix(tokens, postfixx);
+            infix_to_postfix(tokens, postfixx);
 
-                long long int res = evaluate_postfix(postfixx);
+            long long int res = evaluate_postfix(postfixx);
                 printf("res this is %d \n",res);
                 postfix_to_ir(postfixx, outputFile);
-
+           
                 if (!error) {
                     printf("%d\n", res);
                     fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber++);
