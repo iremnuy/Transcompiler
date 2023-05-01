@@ -1158,8 +1158,7 @@ int main(int argc, char *argv[]) {
 
         registerTable = (table *) malloc(sizeof(table));
         init_table(registerTable);
-
-        lineNum = 1;
+        
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
