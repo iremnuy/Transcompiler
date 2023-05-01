@@ -6,15 +6,7 @@
 
 ////////////WAITING REVISIONS////////////////
  /**
-  * makefile will be written
-  */
-
- /**
   * errors
-  */
-
- /**
-  * it should take input.txt as an argument
   */
 
 //LLVM IR definitions
@@ -1057,19 +1049,21 @@ int main(int argc, char *argv[]) {
 
     //rotl method
     fprintf(outputFile,  "define i32 @rotl(i32 %%x, i32 %%shift_amount) {\n"
-                       "%%shifted_left = shl i32 %%x, %%shift_amount\n"
-                       "%%shifted_right = ashr i32 %%x, sub i32 32, %%shift_amount\n"
-                       "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
-                       "ret i32 %%rotated\n"
+                         "%%rs_amount = sub i32 32, %%shift_amount\n"
+                         "%%shifted_left = shl i32 %%x, %%shift_amount\n"
+                         "%%shifted_right = lshr i32 %%x, %%rs_amount\n"
+                         "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
+                          "ret i32 %%rotated\n"
                        "}\n\n");
 
     //rotr method
     fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
-                      "%%shifted_right = ashr i32 %%x, %%shift_amount\n"
-                      "%%shifted_left = shl i32 %%x, sub i32 32, %%shift_amount\n"
-                      "%%rotated = or i32 %%shifted_right, %%shifted_left\n"
-                      "ret i32 %%rotated\n"
-                      "}\n\n");
+                        "%%ls_amount = sub i32 32, %%shift_amount\n"
+                        "%%shifted_right = lshr i32 %%x, %%shift_amount\n"
+                        "%%shifted_left = shl i32 %%x, %%ls_amount\n"
+                        "%%rotated = or i32 %%shifted_right, %%shifted_left\n"
+                        "ret i32 %%rotated\n"
+                        "}\n\n");
 
     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
