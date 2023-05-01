@@ -18,15 +18,13 @@ int error = 0;
 int registerNumber = 1;
 int varExist = 0;
 
-//stack implementation
-
+//Stack implementation
 struct Stack {
     char* items[MAX_EXPR_LEN];
     int top;
 };
 
 struct Stack* createStack() {
-    //struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
     struct Stack* stack = (struct Stack*)calloc(1, sizeof(struct Stack));
     stack->top = -1;
     return stack;
@@ -40,6 +38,11 @@ int isFull(struct Stack* stack) {
     return stack->top == MAX_EXPR_LEN - 1;
 }
 
+/**
+ * method that adds an item to a stack.
+ * @param stack
+ * @param item
+ */
 void push(struct Stack* stack, char* item) {
     if (isFull(stack)) {
         printf("Stack is full\n");
@@ -48,21 +51,17 @@ void push(struct Stack* stack, char* item) {
     }
 }
 
+/**
+ * method that removes an item from the stack.
+ * @param stack
+ * @return
+ */
 char* pop(struct Stack* stack) {
     if (isEmpty(stack)) {
         printf("Stack is empty\n");
         return NULL;
     } else {
         return stack->items[stack->top--];
-    }
-}
-
-char* peek(struct Stack* stack) {
-    if (isEmpty(stack)) {
-        printf("Stack is empty\n");
-        return NULL;
-    } else {
-        return stack->items[stack->top];
     }
 }
 
@@ -168,10 +167,6 @@ void insert(table *table, char *key,  long long int value) {
     int i = index;
     while (table->elements[i].key != NULL && strcmp(table->elements[i].key, "") != 0) {
         if (strcmp(table->elements[i].key, key) == 0) {
-            if (table->elements[i].assigned) {
-                printf("Error: variable '%s' already  must be updated assigned\n", key);
-                return;
-            }
             table->elements[i].value = value;
             table->elements[i].assigned = 1;
             return;
@@ -200,14 +195,13 @@ long long int lookup(table *table, char *key) {
     int i = index;
     while (table->elements[i].key != NULL) {
         if (strcmp(table->elements[i].key, key) == 0) {
-            return table->elements[i].value; //already having this variable value and returning this
-            //NO ASSIGMENT MORE THAN ONCE SO IF LHS OF THE ASSIGMENT İS HERE THEN GİVE ERROR
+            return table->elements[i].value;
         }
         i = (i + 1) % table->size;
 
         if (i == index) {
-            //we have reaached the starting index.
-            //no variable found returning a dummy for an error in AdvCalc++
+            //we have reached the starting index.
+            //no variable found, returning a dummy number of 999999 to indicate no existance in AdvCalc++
             error=1;
             return 999999;
         }
@@ -539,7 +533,7 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 
 /**
  * Function that translates AdvCalc++ language to LLVM IR.
- * This is quite similar to the evaluation function but instead it does translation.
+ * This is quite similar to the evaluation function but instead of interpretation it does translation.
  * @param postfix expression to be evaluated
  * @param fp file pointer that points to the output file. This will be our LLVM IR source code.
  */
@@ -556,8 +550,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
 
 
     for (i = 0; i < numofpost; i++) {
-        printf("REMOVING %s FROM POSTFIX\n",postfix[i].value);
-
         // If the current character is a number, push it onto the stack
         if (isdigit(*postfix[i].value)) {
             push(stack,postfix[i].value);
@@ -737,7 +729,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
         } //else ended
     } //for loop ended
     free(stack);
-    printf("returning\n");
     return;
 }
 
@@ -748,7 +739,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
  * @param postfix expression
  * @return long long int, result of the expression
  */
-
 
 
 long long int evaluate_postfix(Token *postfix) {
@@ -772,7 +762,6 @@ long long int evaluate_postfix(Token *postfix) {
 
 
             //evaluation steps
-
             if (strcmp(op, "xor") == 0) {
 
                 op1 = (stack[top--]);
@@ -1086,11 +1075,6 @@ int main(int argc, char *argv[]) {
 
     //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        printf("line number is : %d  line is   :  ",lineNum);
-        //printf(line);
-        printf("\n");
-
-
         //ASSIGNMENT CHECK
         char *pos = strchr(line, '=');
 
@@ -1101,21 +1085,17 @@ int main(int argc, char *argv[]) {
             char *value = pos + 1; // second part is the value
 
             variable = trim(variable);
-            //printf(variable);
-            printf("\n");
+
             value = trim(value);
             //if variable is assigned before give error for advcal2
 
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-                printf("alpha error\n");
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("xor compare\n");
-
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
@@ -1171,10 +1151,7 @@ int main(int argc, char *argv[]) {
         registerTable = (table *) malloc(sizeof(table));
         init_table(registerTable);
 
-        //printf(line);
-        printf("\n");
-
-        //int lineNum = 1;
+        lineNum = 1;
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
@@ -1280,12 +1257,10 @@ int main(int argc, char *argv[]) {
             //reserved keywords cannot be variable names.
 
             if (!allAlpha(variable)) {
-                printf("alpha değil eror\n");
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
-                printf("çok değişik\n");
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 continue;
 
@@ -1319,7 +1294,6 @@ int main(int argc, char *argv[]) {
             tokenize(value, tokens, &numtok);
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                printf("token assgnm error\n");
                 error = 0; //reset
                 continue;
             }
@@ -1329,7 +1303,6 @@ int main(int argc, char *argv[]) {
             //If there has been an error in tokenization.
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                printf("inf to post error assgnmnt\n");
                 error = 0; //reset
                 continue;
             }
@@ -1338,7 +1311,6 @@ int main(int argc, char *argv[]) {
 
 
             if (error == 1) {
-                printf("evaluate error assignment\n");
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 error = 0; //reset
                 continue;
@@ -1367,17 +1339,13 @@ int main(int argc, char *argv[]) {
 
             //add the result to the hashtable.
             insert(Hashtable, variable, res);
-            printf("after insert line num %d",lineNum);
-
             lineNum++;
-            printf("line num is after ++ %d",lineNum);
             continue;
 
         }
 
             //EXPRESSION EVALUATION
         else { //normal expression input exists. no assignment statement if numtok is one and lookup result is zero(uninit) return error
-            printf("normal expr");
             Token postfixx[257];
             Token tokens[257];
             int numtok = 0;
@@ -1399,7 +1367,7 @@ int main(int argc, char *argv[]) {
                 int result = lookup(Hashtable,tokens[0].value);
 
                 if(result == 999999){
-                    printf("Error on line %d! UNITIALIZED VARIABLE CALLED\n",lineNum);lineNum++;
+                    printf("Error on line %d!\n",lineNum);lineNum++;
                     error=0;
                     continue;
 
@@ -1422,22 +1390,17 @@ int main(int argc, char *argv[]) {
                 infix_to_postfix(tokens, postfixx);
 
                 long long int res = evaluate_postfix(postfixx);
-                printf("res this is %lld \n",res);
-
 
                 postfix_to_ir(postfixx, outputFile);
 
 
-
                 if (!error) {
-                    printf("%lld\n", res);
                     //check again this register increment
                     fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber-1);
                     registerNumber++;
                     lineNum++;
                     continue;
                 }else{
-                    printf("called everything but error \n");
                     printf("Error on line %d!\n",lineNum);
                     lineNum++;
                     continue;//error occured
