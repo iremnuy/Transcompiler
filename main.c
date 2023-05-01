@@ -23,7 +23,8 @@ struct Stack {
 };
 
 struct Stack* createStack() {
-    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
+    //struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
+    struct Stack* stack = (struct Stack*)calloc(1, sizeof(struct Stack));
     stack->top = -1;
     return stack;
 }
