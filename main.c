@@ -540,12 +540,13 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
 
+    //dummy is what we use to propagate and insert already inserted variables to new registers.
+    // if x is inserted, then x0 is inserted with a new register. if x0 is inserted, then x1 is inserted with a new register.
     int dummy = 0;
 
     varExist = 0;
 
     struct Stack* stack = createStack();
-    //int top = -1;
     int i;
 
 
@@ -553,7 +554,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
         // If the current character is a number, push it onto the stack
         if (isdigit(*postfix[i].value)) {
             push(stack,postfix[i].value);
-
         }
 
         else {
@@ -572,10 +572,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 char reg[20];
                 sprintf(reg,"%%%d",registerNumber-1);
                 push(stack,reg);
-                //fprintf(fp,"ADDED TO THE STKC %s\n",reg);
-                //fprintf(fp,"STACK TOP IS %s\n",stack[top]);
-                //fprintf(fp,"STACK TOP-1 IS %s\n",stack[top-1]);
-
 
             }
             else if (strcmp(postfix[i].value, "-") == 0) {
@@ -583,7 +579,6 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 char*  left = pop(stack);
                 fprintf(fp, "\t%%%d = sub i32 %s, %s\n", registerNumber++, left, right);
                 char reg[20];
-                //int dummy = registerNumber -1;
                 sprintf(reg,"%%%d",registerNumber -1);
                 push(stack,reg);
 
@@ -625,9 +620,8 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
 
             else if (strcmp(postfix[i].value, "not") == 0) {
-                //char* right = stack[top--];
+                //not is unary
                 char*  left = pop(stack);
-                //not?
                 fprintf(fp, "\t%%%d = xor i32 %s, -1\n", registerNumber++, left);
                 char reg[20];
                 sprintf(reg,"%%%d",registerNumber-1);
@@ -683,23 +677,20 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 //result = lookup(Hashtable,op);
 
-
-
-
                 char dum[20];
 
-                //already assigned
+                //if the variable is already assigned, propagate.
+                //x0,x1,x2....
+                //in other words postfix[i].value = postfix[i].value+dummy ; dummy+1
                 if(lookup(registerTable,postfix[i].value) != 999999){
                     sprintf(dum,"%s%d",postfix[i].value,dummy);
                     dummy++;
-                    //postfix[i].value = postfix[i].value+dummy ; dummy+1
                 }
 
-                    //not assigned
+                //if the variable is not assigned, it can be represented as itself. i.e x
                 else {
                     sprintf(dum, "%s", postfix[i].value);
                 }
-
 
                 insert(registerTable,dum,registerNumber);
                 long long int regnum = lookup(registerTable,dum);
@@ -707,13 +698,9 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
 
                 registerNumber++;
 
-                //fprintf(outputFile, "\t%s\n", tokens[k].value);
-
-
                 //we have to record this register for future calls.
                 char reg[20];
                 sprintf(reg, "%%%lld", regnum);
-
                 varExist = 1;
                 push(stack,reg);
 
@@ -1015,9 +1002,16 @@ int is_valid_operator(char *line, char *op_name) {
 
 
 int main(int argc, char *argv[]) {
+
+    //variable that represent any number of errors in the input file.
+    //this variable decides whether to form or discard the output file.
     int allError = 0;
 
     FILE *inputFile,*outputFile;
+
+    /**
+     * this parts creates an output file with the same name as input file.
+     */
 
     char *inputFileName = argv[1];
     char *outputFileName = malloc(strlen(inputFileName) + 5);
@@ -1038,7 +1032,7 @@ int main(int argc, char *argv[]) {
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
 
-    //rotl method
+    //rotl method to be printed on *.ll file
     fprintf(outputFile,  "define i32 @rotl(i32 %%x, i32 %%shift_amount) {\n"
                          "%%rs_amount = sub i32 32, %%shift_amount\n"
                          "%%shifted_left = shl i32 %%x, %%shift_amount\n"
@@ -1047,7 +1041,7 @@ int main(int argc, char *argv[]) {
                          "ret i32 %%rotated\n"
                          "}\n\n");
 
-    //rotr method
+    //rotr method to be printed on *.ll file
     fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
                         "%%ls_amount = sub i32 32, %%shift_amount\n"
                         "%%shifted_right = lshr i32 %%x, %%shift_amount\n"
@@ -1062,7 +1056,6 @@ int main(int argc, char *argv[]) {
 
 
     char line[257] = ""; //input line will be stored in here
-    //printf(">");
 
     fprintf(outputFile, "define i32 @main() {\n");
     int lineNum = 1;
@@ -1070,16 +1063,18 @@ int main(int argc, char *argv[]) {
 
     /**
      * var table keeps track of variables so that we do not allocate space for the same variable twice.
+     * Following while loop traverses the whole input file once and creates allocation commands.
      */
+
     table* varTable;
     varTable = (table *) malloc(sizeof(table));
     init_table(varTable);
 
     //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
-        //ASSIGNMENT CHECK
-        char *pos = strchr(line, '=');
 
+
+        char *pos = strchr(line, '=');
         if (pos != NULL) { // if there is an assignment statement
 
             *pos = '\0'; // replace = with \0
@@ -1089,58 +1084,17 @@ int main(int argc, char *argv[]) {
             variable = trim(variable);
 
             value = trim(value);
-            //if variable is assigned before give error for advcal2
 
-            //reserved keywords cannot be variable names.
-
-            if (!allAlpha(variable)) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
+            //We have to collect the variable and allocate space for it.
+            //checking whether have we seen this variable before.
+            int presence = lookup(varTable,variable);
+            if(presence == 999999){
+                //if not encountered before, add it to the variables and allocate space.
+                insert(varTable,variable,100); //dummy value to check presence.
+                fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
+                lineNum++;
                 continue;
-
-            } else if (strcmp("xor", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            } else if (strcmp("ls", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            } else if (strcmp("rs", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            } else if (strcmp("rr", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            } else if (strcmp("lr", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            } else if (strcmp("not", variable) == 0) {
-                printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 0; allError = 1;
-                continue;
-
-            }else{
-                //No errors so far, we have to collect the variable and allocate space for it.
-                //checking whether have we seen this variable before.
-                int presence = lookup(varTable,variable);
-                if(presence == 999999){
-                    //if not encountered before, add it to the variables and allocate space.
-                    insert(varTable,variable,100); //dummy value to check presence.
-                    fprintf(outputFile, "\t%%%s = alloca i32\n", variable);
-                    lineNum++;
-                    continue;
-                }
             }
-
         }
     }
 
@@ -1148,17 +1102,25 @@ int main(int argc, char *argv[]) {
     free(varTable);
     fclose(inputFile);
 
-    //reopen the file after our first scan for variables.
+    //reopen the file after our first scan. Now the remaining code will be generated.
     inputFile = fopen(inputFileName, "r");
     lineNum=1;
 
+
+
+
+
+
+
+
     //start taking inputs
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
+
         //initializing the register table
 
         registerTable = (table *) malloc(sizeof(table));
         init_table(registerTable);
-        
+
 
         //blankline inputs
         if (strcmp(line, "\n") == 0 || strcmp(line, " \n") == 0 || strcmp(line, "\t\n") == 0) {
@@ -1177,7 +1139,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-            //2)lines starting with operations. i.e unary cases like +1+b
+        //2)lines starting with operations. i.e unary cases like +1+b
         else if (line[0] == '+' || line[0] == '-' || line[0] == '*' || line[0] == '&' || line[0] == '|') {
             printf("Error on line %d!\n",lineNum);lineNum++;
             error = 0; allError = 1;
@@ -1191,7 +1153,6 @@ int main(int argc, char *argv[]) {
             }
             **/
 
-
             //3)unbalanced paranthesis expressions
         else if (!is_balanced(line)) {
             printf("Error on line %d!\n",lineNum);lineNum++;
@@ -1199,7 +1160,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-            //4) broken function calls. We need to evalute the whole string for all the 5 functions.
+        //4) broken function calls. We need to evalute the whole string for all the 5 functions.
 
         else if (!check_function(line, "xor")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
@@ -1231,7 +1192,7 @@ int main(int argc, char *argv[]) {
 
 
 
-            //5) we won't allow operators inside paranthesis like 3(+)4
+        //5) we won't allow operators inside paranthesis like 3(+)4
 
         else if (!is_valid_operator(line, "+")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
@@ -1437,8 +1398,7 @@ int main(int argc, char *argv[]) {
                     error = 0;
                     allError = 1;
                     lineNum++;
-                    continue;//error occured
-                    //added this -irem
+                    continue;
                 }
 
 
