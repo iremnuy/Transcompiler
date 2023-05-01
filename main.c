@@ -5,19 +5,9 @@
 #include <stdbool.h>
 
 ////////////WAITING REVISIONS////////////////
-/**
- * %reg = call
- * call
- */
  /**
   * makefile will be written
   */
-
-/**
- * write rotate functions
- * check shift functions again
- *
- */
 
 
 //LLVM IR definitions
@@ -1047,14 +1037,14 @@ int main() {
     //rotl method
     fprintf(outputFile,  "define i32 @rotl(i32 %%x, i32 %%shift_amount) {\n"
                        "%%shifted_left = shl i32 %%x, %%shift_amount\n"
-                       "%%shifted_right = lshr i32 %%x, sub i32 32, %%shift_amount\n"
+                       "%%shifted_right = ashr i32 %%x, sub i32 32, %%shift_amount\n"
                        "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
                        "ret i32 %%rotated\n"
                        "}\n");
 
     //rotr
     fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
-                      "%%shifted_right = lshr i32 %%x, %%shift_amount\n"
+                      "%%shifted_right = ashr i32 %%x, %%shift_amount\n"
                       "%%shifted_left = shl i32 %%x, sub i32 32, %%shift_amount\n"
                       "%%rotated = or i32 %%shifted_right, %%shifted_left\n"
                       "ret i32 %%rotated\n"
