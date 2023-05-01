@@ -706,6 +706,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
         } //else ended
     } //for loop ended
+    free(stack);
     printf("returning\n");
     return;
 }
@@ -1435,6 +1436,8 @@ int main() {
             continue;
         }
     }
+    free(registerTable);
+    free(Hashtable);
     fprintf(outputFile, "\tret i32 0\n");
     fprintf(outputFile, "}\n");
     fclose(inputFile);
