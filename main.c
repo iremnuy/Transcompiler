@@ -1028,7 +1028,7 @@ int main() {
     //Memory needs to be allocated beforehand. So we will perform a first overlook of the file in order to obtain variables that we need to allocate memory for.
     while (fgets(line, sizeof(line), inputFile) !=NULL) {
         printf("line number is : %d  line is   :  ",lineNum);
-        printf(line);
+        //printf(line);
         printf("\n");
 
 
@@ -1042,7 +1042,7 @@ int main() {
             char *value = pos + 1; // second part is the value
 
             variable = trim(variable);
-            printf(variable);
+            //printf(variable);
             printf("\n");
             value = trim(value);
             //if variable is assigned before give error for advcal2
@@ -1112,7 +1112,7 @@ int main() {
         registerTable = (table *) malloc(sizeof(table));
         init_table(registerTable);
 
-        printf(line);
+        //printf(line);
         printf("\n");
 
         //int lineNum = 1;
@@ -1321,7 +1321,7 @@ int main() {
                 fprintf(outputFile, "\tstore i32 %%%d, i32* %%%s\n", registerNumber-1, variable);
             }
             else{
-                fprintf(outputFile, "\tstore i32 %d, i32* %%%s\n", res, variable);
+                fprintf(outputFile, "\tstore i32 %lld, i32* %%%s\n", res, variable);
             }
 
             //add the result to the hashtable.
@@ -1381,7 +1381,7 @@ int main() {
                 infix_to_postfix(tokens, postfixx);
 
                 long long int res = evaluate_postfix(postfixx);
-                printf("res this is %d \n",res);
+                printf("res this is %lld \n",res);
 
                 //before doing postfix to ir, we have to load all variables to registers.
 
@@ -1406,7 +1406,7 @@ int main() {
 
 
                 if (!error) {
-                    printf("%d\n", res);
+                    printf("%lld\n", res);
                     //check again this register increment
                     fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber-1);
                     registerNumber++;
@@ -1436,6 +1436,7 @@ int main() {
             continue;
         }
     }
+
     free(registerTable);
     free(Hashtable);
     fprintf(outputFile, "\tret i32 0\n");
