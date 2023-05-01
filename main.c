@@ -1281,13 +1281,14 @@ int main() {
             }
             //ıf not CALL LLVM IR TRANSLATOR
             long long int res = evaluate_postfix(postfixx);
+
+
             if (error == 1) {
                 printf("evaluate error assignment\n");
                 printf("Error on line %d!\n",lineNum);lineNum++;
                 error = 0; //reset
                 continue;
             }
-
 
             //before doing postfix to ir, we have to load all variables to registers.
 
@@ -1321,7 +1322,7 @@ int main() {
              *
              */
 
-            if(varExist ==1 ) {
+            if(varExist ==1) {
                 fprintf(outputFile, "\tstore i32 %%%d, i32* %%%s\n", registerNumber-1, variable);
             }
             else{
@@ -1384,6 +1385,25 @@ int main() {
 
                 long long int res = evaluate_postfix(postfixx);
                 printf("res this is %d \n",res);
+
+                //before doing postfix to ir, we have to load all variables to registers.
+
+                for(int k = 0 ; k<numtok; k++){
+                    if(tokens[k].type == IDENT){
+                        insert(registerTable,tokens[k].value,registerNumber);
+                        int reg = lookup(registerTable,tokens[k].value);
+
+                        //fprintf(outputFile, "\t%s\n", tokens[k].value);
+                        fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
+                        registerNumber++;
+                        //we have to record this register for future calls.
+                    }
+                    else{
+                        continue;
+                    }
+                }
+
+
                 postfix_to_ir(postfixx, outputFile);
 
 
