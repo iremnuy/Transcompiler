@@ -8,13 +8,9 @@
 
 ////////////WAITING REVISIONS////////////////
 /**
- * not in postfix to ir
+ * add prints 99999 instead of 19
  */
-/**
- * add should be adjusted
- * integers should not be printed with %
- *register should be printed with %
- */
+
 
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
@@ -1264,6 +1260,7 @@ int main() {
             //No error so far, we can evaluate the right-hand side of the assignment. i.e the expression part.
             Token postfixx[257];
             Token tokens[257];
+
             int numtok = 0;
             tokenize(value, tokens, &numtok);
             if (error == 1) {
@@ -1293,10 +1290,13 @@ int main() {
 
 
             //before doing postfix to ir, we have to load all variables to registers.
-            for(int k = 0 ; k<257; k++){
+
+            for(int k = 0 ; k<numtok; k++){
                 if(tokens[k].type == IDENT){
                     insert(registerTable,tokens[k].value,registerNumber);
                     int reg = lookup(registerTable,tokens[k].value);
+
+                    //fprintf(outputFile, "\t%s\n", tokens[k].value);
                     fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
                     registerNumber++;
                     //we have to record this register for future calls.
