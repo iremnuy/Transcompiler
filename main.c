@@ -9,6 +9,13 @@
   * makefile will be written
   */
 
+ /**
+  * errors
+  */
+
+ /**
+  * it should take input.txt as an argument
+  */
 
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
@@ -1026,10 +1033,24 @@ int is_valid_operator(char *line, char *op_name) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
     FILE *inputFile,*outputFile;
-    inputFile = fopen("input.txt", "r");
-    outputFile= fopen("output.ll","w");
+
+    char *inputFileName = argv[1];
+    char *outputFileName = malloc(strlen(inputFileName) + 5);
+    if (outputFileName == NULL) {
+        fprintf(stderr, "Error: out of memory\n");
+        return 1;
+    }
+    strcpy(outputFileName, inputFileName);
+    char *dot = strrchr(outputFileName, '.');
+    if (dot != NULL) {
+        *dot = '\0';
+    }
+    strcat(outputFileName, ".ll");
+
+    inputFile = fopen(inputFileName, "r");
+    outputFile= fopen(outputFileName,"w");
 
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
@@ -1040,15 +1061,15 @@ int main() {
                        "%%shifted_right = ashr i32 %%x, sub i32 32, %%shift_amount\n"
                        "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
                        "ret i32 %%rotated\n"
-                       "}\n");
+                       "}\n\n");
 
-    //rotr
+    //rotr method
     fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
                       "%%shifted_right = ashr i32 %%x, %%shift_amount\n"
                       "%%shifted_left = shl i32 %%x, sub i32 32, %%shift_amount\n"
                       "%%rotated = or i32 %%shifted_right, %%shifted_left\n"
                       "ret i32 %%rotated\n"
-                      "}\n");
+                      "}\n\n");
 
     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
@@ -1146,7 +1167,7 @@ int main() {
     fclose(inputFile);
 
     //reopen the file after our first scan for variables.
-    inputFile = fopen("input.txt", "r");
+    inputFile = fopen(inputFileName, "r");
     lineNum=1;
 
     //start taking inputs
