@@ -5,9 +5,9 @@
 #include <stdbool.h>
 
 ////////////WAITING REVISIONS////////////////
- /**
-  * errors
-  */
+/**
+ * errors
+ */
 
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
@@ -695,7 +695,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                     //postfix[i].value = postfix[i].value+dummy ; dummy+1
                 }
 
-                //not assigned
+                    //not assigned
                 else {
                     sprintf(dum, "%s", postfix[i].value);
                 }
@@ -1015,6 +1015,8 @@ int is_valid_operator(char *line, char *op_name) {
 
 
 int main(int argc, char *argv[]) {
+    int allError = 0;
+
     FILE *inputFile,*outputFile;
 
     char *inputFileName = argv[1];
@@ -1042,8 +1044,8 @@ int main(int argc, char *argv[]) {
                          "%%shifted_left = shl i32 %%x, %%shift_amount\n"
                          "%%shifted_right = lshr i32 %%x, %%rs_amount\n"
                          "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
-                          "ret i32 %%rotated\n"
-                       "}\n\n");
+                         "ret i32 %%rotated\n"
+                         "}\n\n");
 
     //rotr method
     fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
@@ -1093,37 +1095,37 @@ int main(int argc, char *argv[]) {
 
             if (!allAlpha(variable)) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             }else{
@@ -1171,7 +1173,7 @@ int main(int argc, char *argv[]) {
         char *paranthesis_pos = strstr(line, "()");
         if (paranthesis_pos != NULL) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             //line num should be incremented by one
             continue;
         }
@@ -1179,7 +1181,7 @@ int main(int argc, char *argv[]) {
             //2)lines starting with operations. i.e unary cases like +1+b
         else if (line[0] == '+' || line[0] == '-' || line[0] == '*' || line[0] == '&' || line[0] == '|') {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
 
             continue;
         }
@@ -1194,7 +1196,7 @@ int main(int argc, char *argv[]) {
             //3)unbalanced paranthesis expressions
         else if (!is_balanced(line)) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
         }
 
@@ -1202,29 +1204,29 @@ int main(int argc, char *argv[]) {
 
         else if (!check_function(line, "xor")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
 
             continue;
 
         } else if (!check_function(line, "ls")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
 
             continue;
 
         } else if (!check_function(line, "rs")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!check_function(line, "rr")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!check_function(line, "lr")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
         }
 
@@ -1234,27 +1236,27 @@ int main(int argc, char *argv[]) {
 
         else if (!is_valid_operator(line, "+")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!is_valid_operator(line, "-")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!is_valid_operator(line, "&")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!is_valid_operator(line, "*")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
 
         } else if (!is_valid_operator(line, "|")) {
             printf("Error on line %d!\n",lineNum);lineNum++;
-            error = 1;
+            error = 0; allError = 1;
             continue;
         }
 
@@ -1276,37 +1278,37 @@ int main(int argc, char *argv[]) {
 
             if (!allAlpha(variable)) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("xor", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("ls", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("rs", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("rr", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("lr", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             } else if (strcmp("not", variable) == 0) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
                 continue;
 
             }
@@ -1319,7 +1321,8 @@ int main(int argc, char *argv[]) {
             tokenize(value, tokens, &numtok);
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0;
+                allError = 1;
                 continue;
             }
 
@@ -1328,7 +1331,8 @@ int main(int argc, char *argv[]) {
             //If there has been an error in tokenization.
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                allError = 1;
+                error = 0;
                 continue;
             }
             //ıf not CALL LLVM IR TRANSLATOR
@@ -1337,7 +1341,8 @@ int main(int argc, char *argv[]) {
 
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                allError = 1;
+                error = 0;
                 continue;
             }
 
@@ -1345,7 +1350,8 @@ int main(int argc, char *argv[]) {
 
             if (error == 1) {
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0;
+                allError = 1;
                 continue;
             }
 
@@ -1381,7 +1387,7 @@ int main(int argc, char *argv[]) {
             if (numtok == 0) {
                 //error = 1;
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                error = 0; allError = 1;
 
                 continue;
             }
@@ -1394,7 +1400,8 @@ int main(int argc, char *argv[]) {
 
                 if(result == 999999){
                     printf("Error on line %d!\n",lineNum);lineNum++;
-                    error = 1;
+                    error = 0;
+                    allError = 1;
                     continue;
 
 
@@ -1428,11 +1435,11 @@ int main(int argc, char *argv[]) {
                     continue;
                 }else{
                     printf("Error on line %d!\n",lineNum);
-                    error = 1;
+                    error = 0;
+                    allError = 1;
                     lineNum++;
                     continue;//error occured
                     //added this -irem
-
                 }
 
 
@@ -1440,8 +1447,10 @@ int main(int argc, char *argv[]) {
 
 
             if (error == 1) {
+
                 printf("Error on line %d!\n",lineNum);lineNum++;
-                error = 1;
+                allError = 1;
+                error = 0;
                 continue;
             }
 
@@ -1454,11 +1463,11 @@ int main(int argc, char *argv[]) {
     free(Hashtable);
 
     //aborting the file creation in an error
-    if(error == 1){
-	fclose(inputFile);
-	fclose(outputFile);
-	remove(outputFileName);
-	exit(1);
+    if(allError == 1 || error == 1){
+        fclose(inputFile);
+        fclose(outputFile);
+        remove(outputFileName);
+        exit(1);
     }
 
     fprintf(outputFile, "\tret i32 0\n");
