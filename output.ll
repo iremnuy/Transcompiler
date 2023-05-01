@@ -17,22 +17,22 @@ define i32 @main() {
 	store i32 %5, i32* %zvalue
 	%6 = load i32, i32* %zvalue
 	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %6)
-	%7 = load i32, i32* %x
-	%8 = load i32, i32* %y
-	%9 = load i32, i32* %zvalue
-	%10 = sub i32 %7, %8
-	%11 = sub i32 %10, %9
-	store i32 %11, i32* %k
-	%12 = load i32, i32* %x
-	%13 = load i32, i32* %y
-	%14 = mul i32 3, %13
- 	%15 = add i32 2, 5
-	%16 = mul i32 1, %15
- 	%17 = mul i32 %14, %16
- 	%18 = add i32 %12, %17
-	store i32 %18, i32* %k
-	%19 = load i32, i32* %k
-	%20 = add i32 %19, 1
-	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %21 )
+	%8 = load i32, i32* %x
+	%9 = load i32, i32* %y
+	%10 = load i32, i32* %zvalue
+	%11 = sub i32 %8, %9
+	%12 = sub i32 %11, %10
+	store i32 %12, i32* %k
+	%13 = load i32, i32* %x
+	%14 = load i32, i32* %y
+	%15 = mul i32 3, %14
+ 	%16 = add i32 2, 5
+	%17 = mul i32 1, %16
+ 	%18 = mul i32 %15, %17
+ 	%19 = add i32 %13, %18
+	store i32 %19, i32* %k
+	%20 = load i32, i32* %k
+	%21 = add i32 %20, 1
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %22 )
 	ret i32 0
 }
