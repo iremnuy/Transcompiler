@@ -9,6 +9,9 @@
  * %reg = call
  * call
  */
+ /**
+  * makefile will be written
+  */
 
 /**
  * write rotate functions
@@ -1041,8 +1044,21 @@ int main() {
     Hashtable = (table *) malloc(sizeof(table));
     init_table(Hashtable);
 
+    //rotl method
+    fprintf(outputFile,  "define i32 @rotl(i32 %%x, i32 %%shift_amount) {\n"
+                       "%%shifted_left = shl i32 %%x, %%shift_amount\n"
+                       "%%shifted_right = lshr i32 %%x, sub i32 32, %%shift_amount\n"
+                       "%%rotated = or i32 %%shifted_left, %%shifted_right\n"
+                       "ret i32 %%rotated\n"
+                       "}\n");
 
-
+    //rotr
+    fprintf(outputFile, "define i32 @rotr(i32 %%x, i32 %%shift_amount) {\n"
+                      "%%shifted_right = lshr i32 %%x, %%shift_amount\n"
+                      "%%shifted_left = shl i32 %%x, sub i32 32, %%shift_amount\n"
+                      "%%rotated = or i32 %%shifted_right, %%shifted_left\n"
+                      "ret i32 %%rotated\n"
+                      "}\n");
 
     fprintf(outputFile, "; ModuleID = 'advcalc2ir'\n");
     fprintf(outputFile, "declare i32 @printf(i8*, ...)\n");
