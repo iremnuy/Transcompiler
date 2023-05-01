@@ -5,6 +5,32 @@
 #include <stdbool.h>
 
 ////////////WAITING REVISIONS////////////////
+/**
+ * %reg = call
+ * call
+ */
+/**
+ * store 0?
+ */
+/**
+ * shift functions lhrs should be ahrs(rs)
+ */
+
+/**
+ * write rotate functions
+ *
+ */
+
+/**
+ * 	%8 = load i32, i32* %siu
+	%9 = load i32, i32* %siu
+	%10 = load i32, i32* %siu
+	%11 = load i32, i32* %siu
+	%12 = load i32, i32* %siu
+    %13 = sub i32 %8, %8
+    siu - siu + siu * siu / siu
+ */
+
 
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
@@ -649,7 +675,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             else if (strcmp(postfix[i].value, "rs") == 0) {
                 char* right = pop(stack);
                 char*  left = pop(stack);
-                fprintf(fp, "\t%%%d = lshr i32 %s, %s\n", registerNumber++, left, right);
+                fprintf(fp, "\t%%%d = ashr i32 %s, %s\n", registerNumber++, left, right);
                 char reg[20];
                 sprintf(reg,"%%%d",registerNumber-1);
                 push(stack,reg);
