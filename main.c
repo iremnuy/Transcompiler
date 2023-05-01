@@ -4,13 +4,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-
-
 ////////////WAITING REVISIONS////////////////
-/**
- * add prints 99999 instead of 19
- */
-
 
 //LLVM IR definitions
 #define MAX_EXPR_LEN 1000
@@ -1373,7 +1367,9 @@ int main() {
 
                     insert(registerTable,tokens[0].value,registerNumber);
                     fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n", registerNumber, tokens[0].value);
-                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d)\n",registerNumber++);
+                    //check again this register increment
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber++);
+                    registerNumber++;
                     lineNum++;
                     continue;
                 }
@@ -1410,7 +1406,9 @@ int main() {
 
                 if (!error) {
                     printf("%d\n", res);
-                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber++);
+                    //check again this register increment
+                    fprintf(outputFile,"\tcall i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %%%d )\n",registerNumber-1);
+                    registerNumber++;
                     lineNum++;
                     continue;
                 }else{

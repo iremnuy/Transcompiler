@@ -16,7 +16,7 @@ define i32 @main() {
  	%5 = add i32 23, %4
 	store i32 %5, i32* %zvalue
 	%6 = load i32, i32* %zvalue
-	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %6)
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %6 )
 	%8 = load i32, i32* %x
 	%9 = load i32, i32* %y
 	%10 = load i32, i32* %zvalue
@@ -33,6 +33,6 @@ define i32 @main() {
 	store i32 %19, i32* %k
 	%20 = load i32, i32* %k
 	%21 = add i32 %20, 1
-	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %22 )
+	call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %21 )
 	ret i32 0
 }
