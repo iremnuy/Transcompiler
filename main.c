@@ -9,26 +9,11 @@
  * %reg = call
  * call
  */
-/**
- * store 0?
- */
-/**
- * shift functions lhrs should be ahrs(rs)
- */
 
 /**
  * write rotate functions
+ * check shift functions again
  *
- */
-
-/**
- * 	%8 = load i32, i32* %siu
-	%9 = load i32, i32* %siu
-	%10 = load i32, i32* %siu
-	%11 = load i32, i32* %siu
-	%12 = load i32, i32* %siu
-    %13 = sub i32 %8, %8
-    siu - siu + siu * siu / siu
  */
 
 
@@ -569,6 +554,8 @@ void infix_to_postfix(Token *tokens, Token *postfix) {
 
 void postfix_to_ir(Token* postfix,FILE *fp) {
 
+    int dummy = 0;
+
     varExist = 0;
 
     struct Stack* stack = createStack();
@@ -711,16 +698,40 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
                 //result = lookup(Hashtable,op);
-                long long int regnum = lookup(registerTable,op);
+
+
+
+
+                char dum[20];
+
+                //already assigned
+                if(lookup(registerTable,postfix[i].value) != 999999){
+                    sprintf(dum,"%s%d",postfix[i].value,dummy);
+                    dummy++;
+                    //postfix[i].value = postfix[i].value+dummy ; dummy+1
+                }
+
+                //not assigned
+                else {
+                    sprintf(dum, "%s", postfix[i].value);
+                }
+
+
+                insert(registerTable,dum,registerNumber);
+                long long int regnum = lookup(registerTable,dum);
+                fprintf(fp, "\t%%%d = load i32, i32* %%%s\n",registerNumber, postfix[i].value);
+
+                registerNumber++;
+
+                //fprintf(outputFile, "\t%s\n", tokens[k].value);
+
+
+                //we have to record this register for future calls.
                 char reg[20];
                 sprintf(reg, "%%%lld", regnum);
 
                 varExist = 1;
                 push(stack,reg);
-
-                printf("REG IS STORED AS %s\n",reg);
-                //printf("TOP IS %d reg is :%lld  op is: %s \n",top,regnum,op);
-
 
             }
             else if (strcmp(op, ",") == 0) {
@@ -1312,24 +1323,6 @@ int main() {
                 continue;
             }
 
-            //before doing postfix to ir, we have to load all variables to registers.
-
-            for(int k = 0 ; k<numtok; k++){
-                if(tokens[k].type == IDENT){
-                    insert(registerTable,tokens[k].value,registerNumber);
-                    int reg = lookup(registerTable,tokens[k].value);
-
-                    //fprintf(outputFile, "\t%s\n", tokens[k].value);
-                    fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
-                    registerNumber++;
-                    //we have to record this register for future calls.
-                }
-                else{
-                    continue;
-                }
-            }
-
-
             postfix_to_ir(postfixx,outputFile);
 
             if (error == 1) {
@@ -1409,23 +1402,6 @@ int main() {
 
                 long long int res = evaluate_postfix(postfixx);
                 printf("res this is %lld \n",res);
-
-                //before doing postfix to ir, we have to load all variables to registers.
-
-                for(int k = 0 ; k<numtok; k++){
-                    if(tokens[k].type == IDENT){
-                        insert(registerTable,tokens[k].value,registerNumber);
-                        int reg = lookup(registerTable,tokens[k].value);
-
-                        //fprintf(outputFile, "\t%s\n", tokens[k].value);
-                        fprintf(outputFile, "\t%%%d = load i32, i32* %%%s\n",registerNumber, tokens[k].value);
-                        registerNumber++;
-                        //we have to record this register for future calls.
-                    }
-                    else{
-                        continue;
-                    }
-                }
 
 
                 postfix_to_ir(postfixx, outputFile);
