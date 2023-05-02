@@ -69,15 +69,18 @@ As mentioned before, even though our stack-like array structure performed well f
 Although there are other methods like isEmpty() or isFull(), they are mainly used for error checking and are not in the scope of our concern since we did not commit any malicious use. Stack is used to evaluate, or transform postfix expressions to LLVM IR language code. 
 
 
+6.Examples
+6.1 Example 1
+6.2 Example 2
 
-6. Improvements and Extensions
+7. Improvements and Extensions
 Second example in the description forced us to come up with innovative solutions for loading and using repeated variable names in an input line, such as siu*siu-siu/siu. These lines were previously handled by loading different register values to every “siu” as expected but it led us to obtain erroneous register numbers from hashtable - which stores a unique register value for a unique name. Thus when we were operating on a siu*siu expression, it was denoted as    “ %18 = mul i32 %3, %3” instead of  “%18 = mul i32 %3, %4” in our output.ll file. 
 As a solution, we started to derive other key names for repeated variable names in the background, without explicitly noticing the user or the compiler. For example, while inserting a second “siu” to the hashtable, we are adding an distinguishing integer “0” and storing it as siu0 in the Hashtable. Then, we increment that distinguishing factor by one integer right after, so that the 3rd possible siu would be named as siu1, and the next one would be named siu2… respectively. Thus, in the output.ll file it seems like every loaded siu is also named as “siu”, in fact it actually has another name.
 
 Another great improvement to our project was to change the way we handle errors. To be able to print every line number with erroneous syntax or undefined variables, we resorted to a greater error indicator, an integer called AllError. AllError is set to 1 in every error encounter, meanwhile, a smaller error indicator called error is set to 0 before continuing the while loop to catch all other erroneous lines. In the end of the program, if AllError is 1, there was a problem in the input files and we discard the output file we have been forming. 
 
 
-7. Difficulties Encountered
+8. Difficulties Encountered
 Due to having employed a functional approach in building the first advanced calculator, at first AdvCal++  just seemed like a revision of the old functions. Yet of course we encountered quite cumbersome problems and memory issues during the project due to C language and its straining string handling. After we find it out that integer stack will not work for % register numbers and integer differentiation, we hurried up to create a char* stack[] and use it as a Shunting-Yardish way which later resulted in a semi-catastrophic string handling and did not perform well. 
 
 We could not succeed in overwriting the new result of the operation to stack[++top] which was occupied by the old operand that we used to calculate that result. So when we called for this register number with stack[top- -] afterwards, we kept getting the old operand instead of the register number. The problem was quite complicated to detect at first, since pointers and this special way of string storing of C language is not the first that comes to mind.
@@ -85,10 +88,10 @@ Nevertheless, we solved the error by creating a new stack struct instead of usin
 
 Also in Windows we encountered an issue with opening and writing *.ll files, so one of the partners' computers could not compile the same code that was working well in another computer system.
 
-8. Conclusion
+9. Conclusion
 After all, this was a satisfying project for us especially because updating and receiving a robust version of our previous advanced calculator gave us a maintenance experience which operates at interpreter level for simple line arguments. We had the chance to experiment with LLVM IR language, writing another makefile, creating a stack structure from scratch and printing errors line by line. Being familiar with our code from the start gave us a more intuitive sense of handling errors and coming up with more sustainable solutions which will work for most of the case (any case would be a little too assertive). In addition, we believe that we made quite an efficient use of GitHub for version control purposes of the project. Also, carrying our code to VM to be tested on Unix was quite simple due to having it stored in our repository.
 
-9. Appendix
+10. Appendix
 
 Appendix A
 GitHub  https://github.com/iremnuy/Transcompiler 
