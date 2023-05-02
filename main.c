@@ -23,7 +23,7 @@ struct Stack {
     char* items[MAX_EXPR_LEN];
     int top;
 };
-//stack structure
+
 struct Stack* createStack() {
     struct Stack* stack = (struct Stack*)calloc(1, sizeof(struct Stack));
     stack->top = -1;
@@ -203,7 +203,7 @@ long long int lookup(table *table, char *key) {
             //we have reached the starting index.
             //no variable found, returning a dummy number of 999999 to indicate no existance in AdvCalc++
             error=1;
-            return 999999; //use this to detect repeated names in a single line
+            return 999999;
         }
     }
     return 999999;
@@ -569,6 +569,8 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
                 char*  left = pop(stack);
 
                 fprintf(fp, "\t%%%d = add i32 %s, %s\n", registerNumber++, left, right);
+
+                //store the register number in the format %int in the stack.
                 char reg[20];
                 sprintf(reg,"%%%d",registerNumber-1);
                 push(stack,reg);
@@ -620,7 +622,7 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
 
             else if (strcmp(postfix[i].value, "not") == 0) {
-                //not is unary
+                //not is unary, only a single operand.
                 char*  left = pop(stack);
                 fprintf(fp, "\t%%%d = xor i32 %s, -1\n", registerNumber++, left);
                 char reg[20];
@@ -675,13 +677,12 @@ void postfix_to_ir(Token* postfix,FILE *fp) {
             }
             else if (isalpha(*postfix[i].value) && strcmp(postfix[i].value, op) == 0) {
                 //if not a function name, this is a variable. Thus fetch the value.
-                //result = lookup(Hashtable,op);
-
                 char dum[20];
 
                 //if the variable is already assigned, propagate.
                 //x0,x1,x2....
                 //in other words postfix[i].value = postfix[i].value+dummy ; dummy+1
+
                 if(lookup(registerTable,postfix[i].value) != 999999){
                     sprintf(dum,"%s%d",postfix[i].value,dummy);
                     dummy++;
@@ -1147,6 +1148,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+            //% used to be a comment signal, now it is the modulo operation. Thus we omit the check.
             /*char *commentPos = strchr(line, '%');
             if (commentPos != NULL) {
                 *commentPos = '\0'; //trim the expression to the % part included \0
@@ -1232,7 +1234,6 @@ int main(int argc, char *argv[]) {
 
             variable = trim(variable);
             value = trim(value);
-            //if variable is assigned before give error for advcal2
 
             //reserved keywords cannot be variable names.
 
