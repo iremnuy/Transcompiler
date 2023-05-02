@@ -8,7 +8,7 @@ Submission: 01.05.2023
 
 
 Introduction
-In this project, we were expected to implement a Transcompiler for an advanced calculator that does basic arithmetic and bitwise operations using C language. During our previous project, we coded an Interpreter for a similar language using the Shunting Yard Algorithm. This time, the transcompiler was expected to take AdvCalc language as an input and produce code in LLVM IR to be executed. Our previous implementation of the Interpreter in Shunting Yard Algorithm enabled us to perform some changes in the way we evaluate the postfix expressions in the project, resulting in a considerably easy transformation from an Interpreter to a Transcompiler. Our initial approach to this problem was changing the structure of our previously coded postfix evaluator function: instead of performing actual arithmetic operations on a decreasing stack, we translated these arithmetic operations to LLVM syntax and directed the output to a file with fprintf. 
+In this project, we were expected to implement a Transcompiler for an advanced calculator that does basic arithmetic and bitwise operations using C language. During our previous project, we coded an Interpreter for a similar language using the Shunting Yard Algorithm. This time, the transcompiler was expected to take AdvCalc++ language as an input and produce code in LLVM IR to be executed. Our previous implementation of the Interpreter in Shunting Yard Algorithm enabled us to perform some changes in the way we evaluate the postfix expressions in the project, resulting in a considerably easy transformation from an Interpreter to a Transcompiler. Our initial approach to this problem was changing the structure of our previously coded postfix evaluator function: instead of performing actual arithmetic operations on a decreasing stack, we translated these arithmetic operations to LLVM syntax and directed the output to a file with fprintf. 
 
 
 Program Interface and Program Execution
@@ -18,7 +18,7 @@ Later on, this .ll file can be transformed to assembly code with llc command on 
 
 
  Input and Output 
-The program takes inputs from a file and directs the output to a file as well. Input is in the format of mathematical expressions or/and assignments. The input of AdvCalc++ differs from AdvCalc in that it has 2 extra properties: division and remainder. Output is in the format of LLVM IR code. If errors are encountered during the compilation process, error messages are displayed in the terminal screen and no output file is created. The program terminates when an input file is evaluated completely: either resulting in an output with .ll file extension, or no output if the input file contains syntax errors or undefined variables in the AdvCalc++ language.
+The program takes inputs from a file and directs the output to a file as well. Input is in the format of mathematical expressions or/and assignments. The input of AdvCalc++ differs from AdvCalc in that it has 2 extra properties: division and remainder operations. Output is in the format of LLVM IR code. If errors are encountered during the compilation process, error messages are displayed in the terminal screen and no output file is created. The program terminates when an input file is evaluated completely: either resulting in an output with .ll file extension, or no output if the input file contains syntax errors or undefined variables in the AdvCalc++ language.
 
 
 Program Structure 
@@ -45,7 +45,7 @@ First, it creates a stack where we will store operators or left parentheses, lat
 
 
 5.4 Evaluating (Interpreter)
-We did not commit any changes for our evaluation function. However, the evaluation function was our starting point for the translator function postfix_to_ir.
+We did not commit any changes for our evaluation function. However, the evaluation function was our starting point for the new translator function postfix_to_ir.
 For evaluating the postfix array we again create a stack, but this time it consists not of tokens but integers only, we iterate through the postfix array and if we see an integer directly append it to the stack. Otherwise if the current element is an operator, then we extract the last two integers of the stack and do the current operation on them, using a postfix array to make the evaluation function easy and basic as much as possible .
 
 
@@ -57,11 +57,11 @@ At first we attempted to use the same integer stack of our previous implementati
 
 Yet this approach was incompatible with the register number-integer value differentiation. Although our previous stack-like structure with index manipulation worked fine for integers, it did not perform well with strings.
 
-In the new actual stack implementation, we used the string format to store elements in a stack after obtaining from the postfix array. Therefore, we needed strings that include the % sign within itself  for registers not as a result of an external format specification. In other words, we wanted integers in a string to be represented as “int” and register numbers to have the format of “%int”. Another difference with the evaluating function is that it does not store the resulting value of the current block but instead stack[++top] stores the next registerNumber value that the next operation will be held and uses the current register’s value in the print statement. Print statement is for writing the current operation to the output.ll file with the according LLVM IR format.
+In the new actual stack implementation, we used the string format to store elements in a stack after obtaining from the postfix array. Therefore, we needed strings that include the % sign within itself  for registers not as a result of an external format specification. In other words, we wanted integers in a string to be represented as “int” and register numbers to have the format of “%int”. Another difference with the evaluating function is that it does not store the resulting value of the current block but instead stack[++top] stores the next register number value that the next operation will be held and uses the current register’s value in the print statement. Print statement is for writing the current operation to the output.ll file with the according LLVM IR format.
 
 5.6 Hash Table
 We did not alter our Hash Table implementation for the previous project. However, we needed 2 extra hash tables differing from the first project: In addition to the table that holds variables with their corresponding values, we also needed a registerTable that held variables with their corresponding register numbers. 
-Also, for the loading process, we kept a varTable to track variables that have been marked as loaded so far. Shortly after the loading we discard these variables.
+Also, for the loading process, we kept a varTable to track variables that have been marked as loaded so far. Shortly after the loading, we discard these variables.
 We use a quite simple hash table that includes insert and find methods. No delete method was required again for this project. 
 
 	5.7 Stack
@@ -78,19 +78,24 @@ Another great improvement to our project was to change the way we handle errors.
 
 
 7. Difficulties Encountered
-Due to having employed a functional approach in building the first advanced calculator, at first AdvCal++  just seemed like a revision of the old functions. Yet of course we encountered quite cumbersome problems and memory issues during the project thanks to C language and its string handling. After we find it out that integer stack will not  work for register number and integer differentiation, we hurried up to create a char* stack[] and use it as a Shunting-Yardish way which resulted in a semi-catastrophic string handling and did not perform well. 
+Due to having employed a functional approach in building the first advanced calculator, at first AdvCal++  just seemed like a revision of the old functions. Yet of course we encountered quite cumbersome problems and memory issues during the project due to C language and its straining string handling. After we find it out that integer stack will not work for % register numbers and integer differentiation, we hurried up to create a char* stack[] and use it as a Shunting-Yardish way which later resulted in a semi-catastrophic string handling and did not perform well. 
 
-We could not succeed in overwriting the new result of the operation to stack[++top] which was occupied by the old operand that we used to calculate that result. So when we call for this register number with stack[top- -] afterwards, we kept getting the old operand instead of register number. The problem was quite complicated to detect at first, since pointers and this special way of string storing of C language is not the first that comes to mind.
-Nevertheless, we solved the error by creating a stack struct instead of using a stack array with top index, where we can easily overwrite old places of the string with memory de-allocation and so. 
+We could not succeed in overwriting the new result of the operation to stack[++top] which was occupied by the old operand that we used to calculate that result. So when we called for this register number with stack[top- -] afterwards, we kept getting the old operand instead of the register number. The problem was quite complicated to detect at first, since pointers and this special way of string storing of C language is not the first that comes to mind.
+Nevertheless, we solved the error by creating a new stack struct instead of using a stack array with top index, where we can easily overwrite old places of the string with memory de-allocation and so on. 
 
 Also in Windows we encountered an issue with opening and writing *.ll files, so one of the partners' computers could not compile the same code that was working well in another computer system.
 
 8. Conclusion
-After all, this was a satisfying project for us especially because updating and receiving a robust version of our previous advanced calculator gave us a maintenance experience which operates at interpreter level for simple line arguments. We had the chance to experiment with LLVM IR language, writing another makefile, creating a stack structure from scratch and printing errors line by line. Being familiar with our code from the start gave us a more intuitive sense of handling errors and coming up with more sustainable solutions which will work for most of the case (any case would be a little too assertive).
+After all, this was a satisfying project for us especially because updating and receiving a robust version of our previous advanced calculator gave us a maintenance experience which operates at interpreter level for simple line arguments. We had the chance to experiment with LLVM IR language, writing another makefile, creating a stack structure from scratch and printing errors line by line. Being familiar with our code from the start gave us a more intuitive sense of handling errors and coming up with more sustainable solutions which will work for most of the case (any case would be a little too assertive). In addition, we believe that we made quite an efficient use of GitHub for version control purposes of the project. Also, carrying our code to VM to be tested on Unix was quite simple due to having it stored in our repository.
 
 9. Appendix
 
+Appendix A
+GitHub  https://github.com/iremnuy/Transcompiler 
+
+Appendix B
 Our source code and makefile can be found within the same zip file as this documentation. 
+
 
 
 
