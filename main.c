@@ -23,7 +23,7 @@ struct Stack {
     char* items[MAX_EXPR_LEN];
     int top;
 };
-
+//stack structure
 struct Stack* createStack() {
     struct Stack* stack = (struct Stack*)calloc(1, sizeof(struct Stack));
     stack->top = -1;
@@ -203,7 +203,7 @@ long long int lookup(table *table, char *key) {
             //we have reached the starting index.
             //no variable found, returning a dummy number of 999999 to indicate no existance in AdvCalc++
             error=1;
-            return 999999;
+            return 999999; //use this to detect repeated names in a single line
         }
     }
     return 999999;
